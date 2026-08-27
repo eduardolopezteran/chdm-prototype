@@ -1,0 +1,99 @@
+# CHDM v0.1 — Methodology Object Model
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §14
+methodology_version: "0.1"
+registry_object_type: RULE
+
+# §14.1 — Stable identifier convention. Stable IDs do NOT contain the
+# methodology version.
+id_format: "CHDM-{TYPE}-{CONCEPT}-{NNN}"
+approved_format_examples:
+  - CHDM-DIM-VALUE-001
+  - CHDM-DIM-ADOPTION-001
+  - CHDM-OBJ-OUTCOME-ACHIEVED-001
+  - CHDM-EVID-CUSTOMERCONFIRMED-001
+  - CHDM-RISK-CHAMPION-001
+  - CHDM-RULE-PRIORITY-P1-001   # format example ONLY — illustrates the ID
+                                  # convention as given in CHDM v0.1 itself.
+                                  # "P1" refers to the RETIRED Review
+                                  # Priority architecture (superseded by
+                                  # OP1-3/OPU, §10, INV-19) and must never
+                                  # be registered or emitted as a live
+                                  # object. Preserved here only because it
+                                  # is the literal example CHDM v0.1 gives
+                                  # for the naming convention.
+  - CHDM-LIFE-L1-001
+  - CHDM-SAFE-NPS-001
+
+# §14.2 — Canonical object types.
+object_types:
+  DIM:   Customer Health dimension/subdimension
+  OBJ:   Objective/outcome methodology
+  EVID:  Evidence type/state/basis
+  RISK:  Risk mechanism
+  RULE:  Deterministic methodology rule
+  LIFE:  Lifecycle definition/rule
+  STATE: Condition/state definition
+  SAFE:  Methodological safeguard
+  VAL:   Validation requirement
+  LIMIT: Known limitation
+additional_types_require_methodology_governance: true
+
+# The Targeted Amendment additionally requires individually addressable
+# objects for: requirement classes, lifecycle requirement rules,
+# conditional triggers, DMEG, OP, OPU, ER and their governing rules.
+amendment_required_addressable_objects:
+  - requirement_classes
+  - lifecycle_requirement_rules
+  - conditional_triggers
+  - DMEG
+  - OP
+  - OPU
+  - ER
+  - their_governing_rules
+
+# §14.3 — Object properties (schema every methodology object should
+# expose where applicable).
+object_properties:
+  required:
+    - object_id
+    - object_type
+    - name
+    - canonical_definition
+    - purpose
+    - applicability
+    - lifecycle_applicability
+    - evidence_requirements
+    - authority_classification   # Deterministic | AI-supported | Human-confirmed | Human-only
+    - source_lineage
+    - validation_status
+    - methodology_version
+    - effective_date
+    - superseded_by
+    - related_objects
+  optional:
+    - severity
+    - persistence
+    - resolution
+    - rule_inputs
+    - outcome_effect
+    - risk_relationship
+    - known_limitation
+
+# §14.4 — Versioning. Every assessment must record all of these.
+assessment_version_record_fields:
+  - methodology_id
+  - methodology_version
+  - effective_date
+  - rule_set_version
+  - risk_taxonomy_version
+  - dimension_definition_version
+historical_assessments_recalculated_under_future_rules: false
+
+# §14.5 — Supersession behavior.
+supersession_behavior:
+  stable_identity_persists_where_construct_unchanged: true
+  on_rule_replacement:
+    - historical identity remains traceable
+    - status becomes superseded
+    - superseded_by points to the governing successor
+    - historical assessments continue referencing the version originally applied

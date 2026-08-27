@@ -1,0 +1,1264 @@
+# Build Milestone 2 — synthetic, hand-labeled extraction evaluation set
+# (spec §14). All account notes below are entirely synthetic/deidentified
+# — no real customer data. Each case specifies the source text, the
+# observations a correct extraction should find, the required
+# explicit/inferred classification, one or more acceptable exact
+# source-span substrings for each expected observation, and facts that
+# must NOT be extracted. This file is pure data — eval/metrics.py scores
+# a live provider's output against it; nothing here is executed.
+#
+# Milestone 2B.1 revision note: this file was re-annotated (evaluation-
+# only change; no extraction code touched) to fix an under-labeling
+# problem discovered comparing baseline_v1.json against
+# baseline_v1_fix1.json — many real, grounded, Customer-Health-relevant
+# facts the live model correctly extracted had no labeled expectation at
+# all, so they were being scored as "unsupported" even though they were
+# fully grounded. Changes in this revision:
+#   - every expected_observations entry now carries `role`
+#     (primary | supporting | optional-valid) instead of being treated as
+#     uniformly required;
+#   - `span_substring` (singular) is now `span_substrings` (a list) so a
+#     label can accept more than one semantically-equivalent exact span
+#     boundary (e.g. with/without a leading article) without introducing
+#     any fuzzy matching in the extraction pipeline itself — grounding
+#     stays byte-exact; only the evaluator's benchmark-matching step
+#     tolerates boundary variants (Milestone 2B.1 spec §7/§8);
+#   - a new `grounded_but_irrelevant_permitted` list (case 14 only) marks
+#     content that IS correctly grounded but is not Customer-Health
+#     relevant, so it scores as IRRELEVANT_BUT_GROUNDED rather than being
+#     silently rewarded or wrongly penalized as unsupported;
+#   - case 12's "b" side now carries `alternate_types` +
+#     `ontology_ambiguity: true` — an explicit, reviewed evaluation
+#     accommodation (not a new canonical extraction rule; see
+#     eval/metrics.py docstring and the Milestone 2B.1 checkpoint report);
+#   - case 05 was deliberately NOT given an alternate type: its usage-
+#     growth fact stays canonically ADOPTION_OBSERVATION only, so a model
+#     emitting OBJECTIVE_CANDIDATE for it scores WRONG_TYPE, per the
+#     explicit Milestone 2B.1 Case 05 disposition;
+#   - cases 16-20 are new, small, deliberate additions targeting known
+#     classification boundaries (objective evidence strength, adoption vs.
+#     value, a second contradiction example) — the original 15 cases and
+#     their source texts are otherwise unchanged.
+# baseline_v1.json and baseline_v1_fix1.json (scored against the PRIOR
+# single-span, all-required version of this file) are historical
+# artifacts and are not affected by this revision.
+#
+# Milestone 2B.2 revision note (OC-01 ontology clarification, approved):
+# three authorized corrections plus three new minimal validation cases.
+# baseline_v1_fix1_eval2.json (scored against the PRIOR 20-case version
+# of this file) is a historical artifact and is not affected.
+#   - case 12's "b" side: the ontology_ambiguity/alternate_types
+#     accommodation is retired. Under OC-01/OC-02, "Average close time
+#     remains unchanged from baseline" is an observed operational metric,
+#     not a stated desired outcome -- canonical type is now
+#     ADOPTION_OBSERVATION only, consistent with the Case 05 disposition;
+#   - case 20's "a" side: relabeled from OBJECTIVE_CANDIDATE to
+#     STRATEGIC_OBSERVATION under OC-03. "Implementation was completed
+#     ahead of schedule" never states a desired future outcome -- this
+#     was a labeling error in the original Milestone 2B.1 benchmark, not
+#     just a model deficiency, corrected here;
+#   - case 17: relabeled from OBJECTIVE_CANDIDATE to STRATEGIC_OBSERVATION
+#     under OC-03 (approved "Case 17 disposition," reviewed and confirmed
+#     separately from the initial two corrections above). "Completed
+#     phase 1 of the rollout on schedule; phase 2 configuration begins
+#     next week" describes rollout/project status and milestone
+#     progression, not a stated desired customer outcome;
+#   - cases 21-23 are new, small, targeted additions probing the OC-01
+#     boundary directly: an inferred-but-not-explicit objective distinct
+#     from case 16's scenario (21), a pure strategic/project-status fact
+#     with no usage language (22), and a pure adoption/milestone fact
+#     with no goal language (23) -- specifically targeting the
+#     milestone-completion exclusion named in OC-01.
+#
+# Milestone 2C revision note (Candidate CHDM Classification Extraction,
+# approved checkpoint): 10 new cases (24-33) exercising
+# candidate_risk_signals / candidate_evidence_classifications. Cases
+# 01-23 and their source texts are entirely unchanged. Two new optional
+# per-case fields:
+#   - `expected_candidate_risk_signals`: each entry has `mechanism`
+#     (CR-01/02/08 -- CR-03 deferred from AI-automated classification per
+#     the PMO Option B decision; it remains fully governed deterministically,
+#     see registry/risk_mechanisms.yaml), `proposed_severity_tier` (WATCH/MATERIAL/
+#     CRITICAL), `role`, `span_substrings` (the classification's OWN
+#     grounding span), and `supporting_observation_span_substrings`
+#     (identifies WHICH expected_observations entry this classification
+#     must reference, by span match -- mirrors how case 12/20's
+#     `source: a`/`source: b` disambiguate which side a fact belongs to);
+#   - `expected_candidate_evidence_classifications`: same shape, with
+#     `proposed_basis` (PROXY_SUPPORTED/MEASURED_OPERATIONAL_EVIDENCE/
+#     CUSTOMER_CONFIRMED/INDEPENDENTLY_VERIFIED) and `supports`
+#     (ACHIEVED/PROGRESSING/NOT_ACHIEVED) in place of mechanism/tier.
+# Case 32 exercises the negative path directly (both lists explicitly
+# empty -- correct behavior is proposing nothing), mirroring case 14's
+# "empty is the correct primary result" pattern. Case 33 exercises
+# boundary discipline under language that invites (but must not produce)
+# activation/confirmation wording. Cases 24 and 27 each include a
+# distractor observation of a different type so the correct
+# supporting_observation_ref target is a genuine test, not the only
+# option available.
+
+methodology_note: >
+  This file is evaluation data for the Milestone 2 extraction layer only.
+  It has no relationship to the CHDM v0.1 Methodology Registry and is not
+  loaded or validated by engine/registry_loader.py.
+
+cases:
+  - id: "01_clear_customer_objective"
+    description: "A single, unambiguous, explicitly stated customer objective."
+    source_text: >
+      Kickoff notes: the customer's primary goal for this engagement is to
+      reduce manual invoice reconciliation time by 50% within two quarters.
+    expected_observations:
+      - type: OBJECTIVE_CANDIDATE
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "reduce manual invoice reconciliation time by 50% within two quarters"
+    must_not_extract:
+      - "any Objective Outcome state (Achieved/Progressing/etc.)"
+      - "any Value Evidence Basis as a governed final result"
+
+  - id: "02_unknown_absent_objective"
+    description: "Notes that never state what the customer is trying to achieve."
+    source_text: >
+      Weekly sync: attendees were the customer's ops lead and two analysts.
+      We reviewed the dashboard together and answered some configuration
+      questions. No blockers reported.
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "customer's ops lead"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "two analysts"
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "We reviewed the dashboard together and answered some configuration questions"
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "No blockers reported"
+    missing_information_expected:
+      - missing_item: "customer_objective"
+        role: primary
+    must_not_extract:
+      - "a fabricated objective_text to satisfy the schema"
+
+  - id: "03_sponsor_departure"
+    description: "A sponsor's departure is reported, with no statement about a replacement."
+    source_text: >
+      Heads up — Priya, who has been our exec sponsor since the start, is
+      leaving the company at the end of the month.
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Priya, who has been our exec sponsor since the start, is leaving the company at the end of the month"
+    must_not_extract:
+      - "sponsor continuity risk severity or CR-01 activation"
+      - "a claim about whether a replacement has or hasn't been named (not stated here)"
+
+  - id: "04_sponsor_departure_no_replacement"
+    description: "Spec section 4's own worked example: departure + explicit absence of a replacement."
+    source_text: >
+      Ana told us Roberto left the company in July. No replacement sponsor
+      has been named.
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Roberto left the company in July"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "No replacement sponsor has been named"
+    must_not_extract:
+      - "Operational Priority or Evidence Review of any kind"
+      - "an inferred conclusion that the relationship is at risk"
+
+  - id: "05_strong_usage"
+    description: >
+      Clear, explicit evidence of strong direct product usage. Canonical
+      type is ADOPTION_OBSERVATION only (Milestone 2B.1 Case 05
+      disposition) -- the source text never states a customer goal, only
+      usage-growth data, so a model emitting OBJECTIVE_CANDIDATE for this
+      fact must score WRONG_TYPE, not be credited via an alternate type.
+      The schema currently allows this looseness (ObjectiveCandidate's
+      target/timeframe fields are optional) -- documented as a possible
+      future ontology concern, not acted on in this revision.
+    source_text: >
+      Usage report: daily active users grew from 40 to 310 over the
+      quarter, and the core reporting workflow is now used by every
+      regional team.
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "daily active users grew from 40 to 310 over the quarter"
+    must_not_extract:
+      - "a governed D2 Dimension State (Supported/Mixed/Concerning)"
+
+  - id: "06_high_usage_manual_repository_only"
+    description: "High login activity, but the notes describe it as manual, repository-style access rather than active workflow engagement."
+    source_text: >
+      The account shows high login counts, but our CSM notes that most
+      sessions are users manually downloading files from the document
+      repository rather than using any of the guided workflows.
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "most sessions are users manually downloading files from the document repository rather than using any of the guided workflows"
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "The account shows high login counts"
+      - type: EXPERIENCE_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "our CSM notes that most sessions are users manually downloading files from the document repository rather than using any of the guided workflows"
+    must_not_extract:
+      - "a governed adoption conclusion (Supported/Mixed/Concerning)"
+      - "an automated D2 SUPPORTED qualifier (this is manual activity, not automation)"
+
+  - id: "07_healthy_automated_workflow_low_human_activity"
+    description: "Low direct human login activity explained by reliable automation — the D2 safeguard scenario."
+    source_text: >
+      Direct login activity is low this quarter, but that's expected: the
+      integration handles the nightly sync automatically and has run
+      without failure for the last 90 days.
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "the integration handles the nightly sync automatically and has run without failure for the last 90 days"
+          - "the integration handles the nightly sync automatically"
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "Direct login activity is low this quarter"
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "has run without failure for the last 90 days"
+    must_not_extract:
+      - "a governed D2 Supported/Concerning conclusion"
+
+  - id: "08_service_failure"
+    description: >
+      A described service incident, with raw severity language that must
+      not be converted to a CHDM severity tier. Two acceptable span
+      boundaries are listed (Milestone 2B.1 spec section 8 worked
+      example): the live model has been observed choosing either a
+      narrower or a wider verbatim span for the same incident: both are
+      exact grounded quotes of the same material fact.
+    source_text: >
+      We had a critical outage on the customer's primary integration
+      Tuesday night; it was down for roughly 6 hours before the customer's
+      team escalated it to us. Currently resolved.
+    expected_observations:
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "a critical outage on the customer's primary integration"
+          - "critical outage on the customer's primary integration Tuesday night; it was down for roughly 6 hours"
+    must_not_extract:
+      - "activated_severity or any CHDM risk severity tier"
+      - "a CR-02 activation determination"
+
+  - id: "09_commercial_decision_active"
+    description: "An explicit, current commercial/renewal event."
+    source_text: >
+      Procurement flagged that the renewal decision is now active — they
+      are formally evaluating two competitors ahead of the contract
+      end date next quarter.
+    expected_observations:
+      - type: COMMERCIAL_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "the renewal decision is now active"
+      - type: COMMERCIAL_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "evaluating two competitors"
+    must_not_extract:
+      - "a governed D7 Dimension State"
+      - "a churn or renewal probability"
+
+  - id: "10_customer_positive_sentiment"
+    description: "An explicit, attributed positive sentiment statement."
+    source_text: >
+      In the QBR, the VP of Operations said the team has been "extremely
+      happy" with the platform this quarter and called out the support
+      team by name.
+    expected_observations:
+      - type: EXPERIENCE_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "extremely happy"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "the VP of Operations said the team has been \"extremely happy\" with the platform this quarter and called out the support team by name"
+    must_not_extract:
+      - "a governed D4 Dimension State"
+
+  - id: "11_direct_value_confirmation"
+    description: "A direct, measured statement of value realization."
+    source_text: >
+      Finance confirmed that reconciliation time dropped from 6 hours to
+      2.5 hours per week after rollout, matching the original target.
+    expected_observations:
+      - type: OBJECTIVE_CANDIDATE
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "reconciliation time dropped from 6 hours to 2.5 hours per week after rollout"
+          - "reconciliation time dropped from 6 hours to 2.5 hours per week after rollout, matching the original target"
+    must_not_extract:
+      - "Objective Outcome = Achieved as a governed final result"
+      - "Value Evidence Basis assigned as a governed classification"
+
+  - id: "12_contradictory_value_evidence"
+    description: >
+      Spec section 11's own worked example: two sources conflict on
+      whether the objective outcome was achieved. The "b" side was a
+      deliberate, reviewed ONTOLOGY_AMBIGUITY accommodation under
+      Milestone 2B.1 (dual-typed as ADOPTION_OBSERVATION or
+      OBJECTIVE_CANDIDATE). Milestone 2B.2 (OC-01 ontology clarification,
+      precedence rule OC-02) resolved this: "Average close time remains
+      unchanged from baseline" is an observed operational metric, not a
+      stated desired outcome -- it answers "what is the customer doing /
+      what happened," not "what is the customer trying to achieve." It is
+      evidence relevant to the objective stated in source A, but under
+      one-fact-one-primary-type it is canonically ADOPTION_OBSERVATION
+      only. A model emitting OBJECTIVE_CANDIDATE for this fact now scores
+      WRONG_TYPE, consistent with the Case 05 disposition. This is a
+      benchmark correction caused by the approved ontology clarification,
+      not a loosening or tightening of scoring for its own sake.
+    source_text_a: "The customer confirmed the expected reduction in close time was achieved."
+    source_text_b: "Average close time remains unchanged from baseline."
+    expected_observations:
+      - type: OBJECTIVE_CANDIDATE
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "the expected reduction in close time was achieved"
+        source: a
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Average close time remains unchanged from baseline"
+        source: b
+    expected_contradiction:
+      required: true
+      must_not_include:
+        - "a resolution of which source is correct"
+        - "Disputed"
+        - "D1 = Mixed"
+        - "a DMEG"
+    must_not_extract:
+      - "any resolution, averaging, or downgrading of either source"
+
+  - id: "13_strategic_organizational_event"
+    description: "An explicit strategic/organizational change at the customer."
+    source_text: >
+      The customer announced an internal reorg last week that merges the
+      operations and finance departments under a single new VP starting
+      next month.
+    expected_observations:
+      - type: STRATEGIC_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "an internal reorg last week that merges the operations and finance departments"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "single new VP starting next month"
+    must_not_extract:
+      - "a governed D8A/D8B Dimension State"
+
+  - id: "14_irrelevant_noise_text"
+    description: >
+      Text with no CHDM-relevant candidate facts at all. The live model
+      has been observed grounding two spans here (a named-role birthday
+      aside, a rescheduled call) that are real and correctly grounded but
+      not Customer-Health relevant -- these are explicitly permitted as
+      IRRELEVANT_BUT_GROUNDED (Milestone 2B.1 Case 14 disposition), never
+      credited as valid finds and never penalized as unsupported.
+    source_text: >
+      Called in to a bad connection, rescheduled for Thursday. Also, happy
+      early birthday to the account's admin assistant.
+    expected_observations: []
+    grounded_but_irrelevant_permitted:
+      - type: STAKEHOLDER_OBSERVATION
+        span_substrings:
+          - "account's admin assistant"
+      - type: SERVICE_OBSERVATION
+        span_substrings:
+          - "Called in to a bad connection, rescheduled for Thursday"
+    must_not_extract:
+      - "any fabricated observation of any type"
+    notes: "An empty extraction is the CORRECT primary result here (spec §13); the two irrelevant-but-grounded spans above are a known, permitted exception."
+
+  - id: "15_ambiguous_statement_should_remain_inferred"
+    description: "A statement that reasonably suggests something but does not directly state it — must surface only as INFERRED_CANDIDATE, never as EXPLICIT, and never as a governed conclusion."
+    source_text: >
+      Roberto was our executive sponsor. He left the company last month.
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Roberto was our executive sponsor"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "He left the company last month"
+    inferred_candidates_permitted:
+      - text: "sponsor continuity may now be unresolved"
+        basis: INFERRED_CANDIDATE
+    must_not_extract:
+      - "'sponsor continuity may now be unresolved' labeled as EXPLICIT"
+      - "any governed CR-01 activation or Operational Priority conclusion derived from this inference"
+
+  - id: "16_inferred_objective_not_explicit"
+    description: >
+      New Milestone 2B.1 case (Objective Evidence: inferable-but-not-
+      explicit). The customer never states a goal; repeated questioning
+      about a specific process reasonably suggests one, but nothing here
+      should surface as an EXPLICIT-basis objective.
+    source_text: >
+      The customer keeps asking whether we can shave time off their
+      monthly close process.
+    expected_observations: []
+    inferred_candidates_permitted:
+      - text: "the customer wants to reduce time spent on the monthly close process"
+        basis: INFERRED_CANDIDATE
+        type: OBJECTIVE_CANDIDATE
+        span_substrings:
+          - "The customer keeps asking whether we can shave time off their monthly close process"
+    must_not_extract:
+      - "an EXPLICIT-basis ObjectiveCandidate stating the customer's goal (never directly stated here)"
+      - "a governed Objective Outcome state"
+
+  - id: "17_milestone_completion_value_proxy"
+    description: >
+      New Milestone 2B.1 case (Value Proxy: milestone completion supports
+      Progressing, not full realization). Milestone 2B.2 correction
+      (OC-01 ontology clarification, precedence rule OC-03, approved
+      "Case 17 disposition"): the original OBJECTIVE_CANDIDATE label was
+      itself wrong under the clarified ontology, not just a permissive
+      schema gap -- "completed phase 1 of the rollout on schedule; phase
+      2 configuration begins next week" describes rollout/project status
+      and milestone progression, not a stated desired customer outcome.
+      OC-01 explicitly excludes milestone completion from triggering
+      ObjectiveCandidate. Canonical type is now STRATEGIC_OBSERVATION,
+      aligned with the Case 20 correction.
+    source_text: >
+      The customer completed phase 1 of the rollout on schedule; phase 2
+      configuration begins next week.
+    expected_observations:
+      - type: STRATEGIC_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "The customer completed phase 1 of the rollout on schedule"
+    must_not_extract:
+      - "an OBJECTIVE_CANDIDATE for this fact (milestone/phase completion and status, not a stated desired outcome, per OC-01)"
+      - "an Objective Outcome = Achieved governed conclusion (this is milestone/phase completion, not full objective realization)"
+      - "a Value Evidence Basis governed classification"
+
+  - id: "18_high_usage_value_unproven"
+    description: >
+      New Milestone 2B.1 case (Adoption vs. Value: usage is high but
+      value is explicitly unproven/unconfirmed).
+    source_text: >
+      Login activity is at an all-time high this month, but the customer
+      has not yet confirmed whether it is actually reducing their
+      processing time.
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Login activity is at an all-time high this month"
+    missing_information_expected:
+      - missing_item: "value_confirmation"
+        role: supporting
+    must_not_extract:
+      - "a governed Value Evidence Basis of Measured Operational Evidence (value is explicitly unconfirmed here)"
+      - "an Objective Outcome = Achieved conclusion"
+
+  - id: "19_narrow_but_effective_adoption"
+    description: >
+      New Milestone 2B.1 case (Adoption vs. Value: narrow seat usage that
+      is nonetheless deep/effective -- narrow breadth must not
+      automatically read as weak adoption).
+    source_text: >
+      Only two of the twelve licensed seats are active, but those two
+      users run the core billing reconciliation workflow every single day
+      without issue.
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "those two users run the core billing reconciliation workflow every single day without issue"
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: supporting
+        span_substrings:
+          - "Only two of the twelve licensed seats are active"
+    must_not_extract:
+      - "a governed D2 Dimension State of Concerning derived from low seat count alone"
+
+  - id: "20_second_contradiction_project_status"
+    description: >
+      New Milestone 2B.1 case (a second contradiction example, spec
+      section 9/section 8's item 9 -- structurally distinct from case 12:
+      a project-status conflict rather than a value/outcome conflict).
+      Milestone 2B.2 correction (OC-01 ontology clarification, precedence
+      rule OC-03): side A's original label of OBJECTIVE_CANDIDATE was
+      itself wrong under the clarified ontology, not just a model
+      deficiency -- "implementation was completed ahead of schedule"
+      never states a desired future outcome; it reports project/status
+      fact, exactly like side B. Both sides are canonically
+      STRATEGIC_OBSERVATION. A model's earlier OBJECTIVE_CANDIDATE (side
+      A) or ADOPTION_OBSERVATION (either side) outputs against this case
+      remain genuine wrong-type results under OC-03 -- this relabel is a
+      benchmark correction caused by the approved ontology clarification,
+      not score manipulation.
+    source_text_a: "The customer's onboarding lead said implementation was completed ahead of schedule."
+    source_text_b: "Internal tracking shows the implementation project is still open with three tasks outstanding."
+    expected_observations:
+      - type: STRATEGIC_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "implementation was completed ahead of schedule"
+        source: a
+      - type: STRATEGIC_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "the implementation project is still open with three tasks outstanding"
+        source: b
+    expected_contradiction:
+      required: true
+      must_not_include:
+        - "a resolution of which source is correct"
+        - "Disputed"
+        - "D1 = Mixed"
+        - "a DMEG"
+    must_not_extract:
+      - "any resolution, averaging, or downgrading of either source"
+
+  - id: "21_inferred_objective_from_support_pattern"
+    description: >
+      New Milestone 2B.2 case (OC-01 validation: inferred-but-not-explicit
+      objective, distinct scenario from case 16 -- here the signal is a
+      repeated support-ticket pattern rather than a single direct
+      question). The explicit fact is the ticket pattern itself
+      (SERVICE_OBSERVATION); the underlying desire for CRM integration is
+      never directly stated and must surface only as
+      INFERRED_CANDIDATE, never as an EXPLICIT-basis ObjectiveCandidate.
+    source_text: "Over the last quarter, the customer has opened four support tickets asking whether their CRM data can be connected to our platform automatically."
+    expected_observations:
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "the customer has opened four support tickets asking whether their CRM data can be connected to our platform automatically"
+    inferred_candidates_permitted:
+      - text: "the customer wants their CRM data connected to the platform automatically"
+        basis: INFERRED_CANDIDATE
+        type: OBJECTIVE_CANDIDATE
+        span_substrings:
+          - "Over the last quarter, the customer has opened four support tickets asking whether their CRM data can be connected to our platform automatically"
+    must_not_extract:
+      - "an EXPLICIT-basis ObjectiveCandidate stating a CRM-integration goal (never directly stated here)"
+      - "a governed Objective Outcome state"
+
+  - id: "22_pure_strategic_no_usage_language"
+    description: >
+      New Milestone 2B.2 case (OC-01 validation: pure organizational/
+      strategic context with no product usage, behavior, or activity
+      language anywhere in the source -- must type as
+      STRATEGIC_OBSERVATION only, and must not be pulled toward
+      ObjectiveCandidate merely because it describes forward-looking
+      organizational change).
+    source_text: "The customer's IT department announced they are consolidating three regional data centers into one during the third quarter, as part of a broader infrastructure modernization initiative."
+    expected_observations:
+      - type: STRATEGIC_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "consolidating three regional data centers into one during the third quarter"
+          - "The customer's IT department announced they are consolidating three regional data centers into one during the third quarter, as part of a broader infrastructure modernization initiative"
+    must_not_extract:
+      - "an ADOPTION_OBSERVATION (no product usage, behavior, or activity is described here)"
+      - "an OBJECTIVE_CANDIDATE (no desired outcome involving this vendor's product is stated)"
+      - "a governed D8A/D8B Dimension State"
+
+  - id: "23_pure_adoption_milestone_no_goal_language"
+    description: >
+      New Milestone 2B.2 case (OC-01 validation: pure adoption/milestone-
+      completion facts with no goal language anywhere in the source --
+      directly targets the milestone-completion exclusion named in OC-01.
+      Both facts must stay ADOPTION_OBSERVATION; neither should be pulled
+      toward ObjectiveCandidate merely because "finished configuring"
+      reads like completion of something.)
+    source_text: "The customer's team finished configuring all twelve automated workflows this week, and now runs the platform's nightly batch job every night without any manual intervention."
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "finished configuring all twelve automated workflows this week"
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "runs the platform's nightly batch job every night without any manual intervention"
+    must_not_extract:
+      - "an OBJECTIVE_CANDIDATE for either fact (milestone completion / operational activity, not a stated desired outcome, per OC-01)"
+      - "a governed Objective Outcome = Achieved conclusion"
+
+  - id: "24_cr01_sponsor_departure_critical_with_distractor"
+    description: >
+      Milestone 2C case. Unambiguous CR-01 (Sponsor/Champion Continuity)
+      candidate: departure with no successor AND no other engaged
+      stakeholder named anywhere -- CRITICAL is the clearly-implied
+      potential tier. Includes an unrelated SERVICE_OBSERVATION as a
+      distractor so the candidate risk signal's supporting_observation_ref
+      must correctly target the StakeholderObservation, not the
+      distractor.
+    source_text: >
+      Marcus, our only point of contact and the executive sponsor since
+      signing, told us today he is leaving the company at the end of the
+      week. No successor has been named and we have no other relationship
+      at the account. Separately, a minor billing portal glitch was fixed
+      Tuesday.
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Marcus, our only point of contact and the executive sponsor since signing, told us today he is leaving the company at the end of the week"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "No successor has been named and we have no other relationship at the account"
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "a minor billing portal glitch was fixed Tuesday"
+    expected_candidate_risk_signals:
+      - mechanism: "CR-01"
+        proposed_severity_tier: "CRITICAL"
+        role: primary
+        span_substrings:
+          - "No successor has been named and we have no other relationship at the account"
+        supporting_observation_span_substrings:
+          - "No successor has been named and we have no other relationship at the account"
+    must_not_extract:
+      - "activated_severity or any activated CR-01 determination"
+      - "a candidate risk signal grounded in the billing-glitch distractor"
+
+  - id: "25_cr02_service_failure_material"
+    description: >
+      Milestone 2C case. An ongoing service failure affecting a core
+      workflow, without the total-outage/no-escalation-path language that
+      would justify CRITICAL -- MATERIAL is the clearly-implied tier.
+    source_text: >
+      The customer's core reporting workflow has been failing
+      intermittently for six days; their team has a manual workaround in
+      place but says it is time-consuming and they are frustrated.
+    expected_observations:
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "The customer's core reporting workflow has been failing intermittently for six days"
+      - type: EXPERIENCE_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "their team has a manual workaround in place but says it is time-consuming and they are frustrated"
+    expected_candidate_risk_signals:
+      - mechanism: "CR-02"
+        proposed_severity_tier: "MATERIAL"
+        role: primary
+        span_substrings:
+          - "The customer's core reporting workflow has been failing intermittently for six days"
+        supporting_observation_span_substrings:
+          - "The customer's core reporting workflow has been failing intermittently for six days"
+    must_not_extract:
+      - "activated_severity or any activated CR-02 determination"
+      - "a Dimension State for D2 or D3"
+
+  - id: "26_cr03_commercial_continuity_watch"
+    description: >
+      Milestone 2C case. ORIGINALLY a positive CR-03 (Commercial
+      Continuity) candidate-risk-signal test. REFRAMED under the PMO
+      Option B decision (Milestone 2C MVP scope reduction) into an
+      MVP-boundary test: across three live evaluation rounds
+      (prompt_v3_2c_eval1, prompt_v3_refine1_2c_eval2,
+      prompt_v3_refine2_2c_eval3) this case never once produced a correct
+      CR-03 candidate, and automated CR-03 classification is now deferred
+      from the MVP entirely -- CR-03 remains fully implemented in CHDM,
+      the registry, and the deterministic engine (registry/risk_mechanisms.yaml,
+      engine/risk_engine.py); only AI-generated candidate classification for
+      it is deferred, and CR-03 is now structurally unavailable in the
+      model-facing schema (extraction/json_schemas.py's MECHANISM_SCHEMA).
+      This case id is kept unchanged (not renamed) for longitudinal
+      comparability across the v3/v3.1/v3.2/v4 runs. It now verifies
+      three things: (1) the underlying CommercialObservation is still
+      extracted correctly; (2) no CR-01/CR-02/CR-08 candidate risk signal
+      is force-fit onto this commercial-continuity fact merely because
+      CR-03 is unavailable; (3) no CR-03 candidate is emitted (now
+      impossible at the schema level, not merely discouraged in prompt
+      wording). Historical evidence that CR-03 automation was evaluated
+      and deliberately deferred is preserved here and in
+      extraction/prompts.py's PROMPT_VERSION changelog.
+    source_text: >
+      Procurement mentioned they have started a routine market scan ahead
+      of next year's renewal, just to confirm they are still getting
+      competitive pricing; no formal evaluation has been opened.
+    expected_observations:
+      - type: COMMERCIAL_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "they have started a routine market scan ahead of next year's renewal"
+    expected_candidate_risk_signals: []
+    must_not_extract:
+      - "activated_severity or any activated CR-03 determination"
+      - "a churn or renewal probability"
+      - "a CR-01, CR-02, or CR-08 candidate risk signal force-fit onto this commercial-continuity fact"
+      - "a CR-03 candidate risk signal (CR-03 is structurally unavailable in the MVP schema, not merely discouraged)"
+
+  - id: "27_cr08_value_rejection_critical_with_distractor"
+    description: >
+      Milestone 2C case. Explicit customer statement rejecting realized
+      value entirely -- CRITICAL is the clearly-implied potential tier.
+      Includes an unrelated STAKEHOLDER_OBSERVATION as a distractor so the
+      candidate risk signal must correctly target the ExperienceObservation.
+    source_text: >
+      In the QBR, the VP of Finance said flatly that the platform has not
+      delivered any measurable value and they are questioning whether to
+      continue. The customer's ops analyst, Dana, joined the call as well.
+    expected_observations:
+      - type: EXPERIENCE_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "the platform has not delivered any measurable value and they are questioning whether to continue"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "The customer's ops analyst, Dana, joined the call as well"
+    expected_candidate_risk_signals:
+      - mechanism: "CR-08"
+        proposed_severity_tier: "CRITICAL"
+        role: primary
+        span_substrings:
+          - "the platform has not delivered any measurable value and they are questioning whether to continue"
+        supporting_observation_span_substrings:
+          - "the platform has not delivered any measurable value and they are questioning whether to continue"
+    must_not_extract:
+      - "activated_severity or any activated CR-08 determination"
+      - "an Objective Outcome = Not Achieved governed conclusion"
+      - "a candidate risk signal grounded in the Dana distractor"
+
+  - id: "28_evidence_classification_proxy_supported"
+    description: >
+      Milestone 2C case. An indirect proxy (a support-ticket-volume trend)
+      offered as evidence toward an objective, without any direct
+      measurement or customer statement -- PROXY_SUPPORTED / PROGRESSING.
+    source_text: >
+      The customer's goal is to reduce support burden on their internal
+      IT team. Support ticket volume from this account has trended down
+      for three consecutive months.
+    expected_observations:
+      - type: OBJECTIVE_CANDIDATE
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "reduce support burden on their internal IT team"
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "Support ticket volume from this account has trended down for three consecutive months"
+    expected_candidate_evidence_classifications:
+      - proposed_basis: "PROXY_SUPPORTED"
+        supports: "PROGRESSING"
+        role: primary
+        span_substrings:
+          - "Support ticket volume from this account has trended down for three consecutive months"
+        supporting_observation_span_substrings:
+          - "reduce support burden on their internal IT team"
+    must_not_extract:
+      - "Objective Outcome = Achieved as a governed final result"
+      - "a Value Evidence Basis assigned as a governed classification"
+
+  - id: "29_evidence_classification_measured_operational_achieved"
+    description: >
+      Milestone 2C case. A direct measured operational metric fully
+      matching the stated objective's target -- MEASURED_OPERATIONAL_
+      EVIDENCE / ACHIEVED.
+    source_text: >
+      The customer's stated goal was to cut average ticket resolution
+      time to under 4 hours. Platform analytics now show average
+      resolution time at 3.6 hours over the last 30 days.
+    expected_observations:
+      - type: OBJECTIVE_CANDIDATE
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "cut average ticket resolution time to under 4 hours"
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "Platform analytics now show average resolution time at 3.6 hours over the last 30 days"
+    expected_candidate_evidence_classifications:
+      - proposed_basis: "MEASURED_OPERATIONAL_EVIDENCE"
+        supports: "ACHIEVED"
+        role: primary
+        span_substrings:
+          - "Platform analytics now show average resolution time at 3.6 hours over the last 30 days"
+        supporting_observation_span_substrings:
+          - "cut average ticket resolution time to under 4 hours"
+    must_not_extract:
+      - "Objective Outcome = Achieved as a governed final result"
+      - "Assessment Reliability of any kind"
+
+  - id: "30_evidence_classification_customer_confirmed_achieved"
+    description: >
+      Milestone 2C case. The customer's own words directly confirming
+      realization of a stated goal -- CUSTOMER_CONFIRMED / ACHIEVED.
+      Deliberately a different scenario from case 11 (which remains
+      unmodified per the approved Case 11 disposition).
+    source_text: >
+      The customer's stated goal was faster month-end close. On the call,
+      the controller said in her own words, "we've hit that target -- our
+      close now finishes in under three days."
+    expected_observations:
+      - type: OBJECTIVE_CANDIDATE
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "faster month-end close"
+      - type: EXPERIENCE_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "we've hit that target -- our close now finishes in under three days"
+    expected_candidate_evidence_classifications:
+      - proposed_basis: "CUSTOMER_CONFIRMED"
+        supports: "ACHIEVED"
+        role: primary
+        span_substrings:
+          - "we've hit that target -- our close now finishes in under three days"
+        supporting_observation_span_substrings:
+          - "faster month-end close"
+    must_not_extract:
+      - "Objective Outcome = Achieved as a governed final result"
+      - "Value Evidence Basis assigned as a governed classification"
+
+  - id: "31_evidence_classification_independently_verified_achieved"
+    description: >
+      Milestone 2C case. A third-party/independent audit result, not
+      sourced from the customer's own statement or the vendor's own
+      product telemetry -- INDEPENDENTLY_VERIFIED / ACHIEVED.
+    source_text: >
+      The customer's goal was full compliance with the new data-retention
+      policy. An independent external auditor's report, shared with us
+      this week, confirmed the account is now fully compliant.
+    expected_observations:
+      - type: OBJECTIVE_CANDIDATE
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "full compliance with the new data-retention policy"
+    expected_candidate_evidence_classifications:
+      - proposed_basis: "INDEPENDENTLY_VERIFIED"
+        supports: "ACHIEVED"
+        role: primary
+        span_substrings:
+          - "An independent external auditor's report, shared with us this week, confirmed the account is now fully compliant"
+        supporting_observation_span_substrings:
+          - "full compliance with the new data-retention policy"
+    must_not_extract:
+      - "Objective Outcome = Achieved as a governed final result"
+      - "Assessment Reliability of any kind"
+
+  - id: "32_no_candidate_classification_negative"
+    description: >
+      Milestone 2C anti-fabrication case. Ordinary, evidence-grounded
+      observations that touch neither a risk mechanism nor an
+      objective/value interpretation clearly enough to warrant a
+      candidate classification. Correct behavior is proposing NEITHER
+      type -- both lists empty, mirroring case 14's "empty is the correct
+      primary result" pattern, applied here to the two Milestone 2C types
+      specifically rather than to observations generally.
+    source_text: >
+      Weekly sync: the customer's ops lead joined and we walked through
+      the current dashboard configuration together. Nothing further was
+      discussed.
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "the customer's ops lead joined"
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "we walked through the current dashboard configuration together"
+    expected_candidate_risk_signals: []
+    expected_candidate_evidence_classifications: []
+    must_not_extract:
+      - "any candidate_risk_signal fabricated to fill a perceived gap"
+      - "any candidate_evidence_classification fabricated to fill a perceived gap"
+    notes: "An extraction with no candidate classifications of either kind is the CORRECT primary result here."
+
+  - id: "33_boundary_pressure_risk_signal_no_activation_language"
+    description: >
+      Milestone 2C boundary-discipline case. Strong risk-sounding language
+      that could tempt a model toward "confirmed"/activated phrasing. A
+      CR-02 candidate risk signal is still expected (the evidence
+      genuinely supports proposing one), but it must remain a POTENTIAL
+      proposal only -- WATCH/MATERIAL/CRITICAL tier language is
+      permitted; "confirmed," "activated," or any governed-conclusion
+      wording is not, and would be caught as a boundary violation if the
+      model attempted to emit it as a field rather than prose.
+    source_text: >
+      The customer's primary integration has been down since this
+      morning; their team is actively escalating and says this is
+      urgent and business-critical for them right now.
+    expected_observations:
+      - type: SERVICE_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "The customer's primary integration has been down since this morning"
+    expected_candidate_risk_signals:
+      - mechanism: "CR-02"
+        proposed_severity_tier: "CRITICAL"
+        role: primary
+        span_substrings:
+          - "The customer's primary integration has been down since this morning"
+        supporting_observation_span_substrings:
+          - "The customer's primary integration has been down since this morning"
+    must_not_extract:
+      - "\"confirmed\": true or any equivalent activation flag anywhere in the response"
+      - "activated_severity as a field, regardless of the prose used to describe the incident"
+
+  # ---------------------------------------------------------------------
+  # Milestone 4B — D2/D6 Candidate Qualifier Extraction (resolves
+  # M3-OD-01). Cases 34-42 exercise the SEPARATE stage-2 classifier
+  # (extraction.pipeline.run_dimension_qualifier_classification), never
+  # run_extraction() itself -- `expected_dimension_d2_qualifiers` /
+  # `expected_dimension_d6_qualifiers` are scored by
+  # eval.metrics.classify_dimension_qualifiers against the stage-2
+  # output, via eval/run_eval.py's two-stage per-case flow. Each entry:
+  # `qualifier` (the exact D2/D6 vocabulary value), `role`
+  # (primary|supporting|optional-valid, defaults to primary),
+  # `supporting_observation_span_substrings` (must match a real
+  # expected_observations entry in the SAME case -- exactly the same
+  # discipline as expected_candidate_risk_signals/expected_candidate_
+  # evidence_classifications above). Cases 34-38 cover the 5 D2
+  # qualifiers; 39-41 cover the 4 D6 qualifiers (case 40 specifically
+  # targets the CHAMPION_LOST_NO_SUCCESSOR vs CHAMPION_DEPARTURE_
+  # UNCONFIRMED distinction flagged as the trickiest pair during
+  # architecture negotiation); case 42 is a co-occurrence case (one D2 +
+  # one D6 qualifier from the same evidence batch) that also probes
+  # non-force-fit behavior (a third, unremarkable adoption observation
+  # that must receive NO D2 qualifier proposal).
+  # ---------------------------------------------------------------------
+
+  - id: "34_d2_qualifier_intended_workflows_operating_normally"
+    description: >
+      Milestone 4B D2 qualifier coverage case 1 of 5. Ordinary, on-track
+      adoption -- the intended workflow is operating normally, with no
+      concerning language of any kind.
+    source_text: "The customer's finance team continues to run their month-end close workflow in the platform exactly as designed, with no reported issues this quarter."
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "continues to run their month-end close workflow in the platform exactly as designed, with no reported issues this quarter"
+    expected_dimension_d2_qualifiers:
+      - qualifier: "INTENDED_WORKFLOWS_OPERATING_NORMALLY"
+        role: primary
+        supporting_observation_span_substrings:
+          - "continues to run their month-end close workflow in the platform exactly as designed, with no reported issues this quarter"
+    expected_dimension_d6_qualifiers: []
+
+  - id: "35_d2_qualifier_automation_reliable_low_login_ok"
+    description: >
+      Milestone 4B D2 qualifier coverage case 2 of 5. Low direct login
+      activity that is explicitly explained by reliable automation --
+      must not be force-fit into WORKFLOWS_NOT_OCCURRING or
+      ADOPTION_MATERIALLY_DETERIORATING_UNEXPLAINED just because login
+      counts are low. NORMALIZED (D2 EXPLICIT-basis composition gate
+      checkpoint, benchmark audit): this case's two facts -- automation
+      reliability, and low login explained by that automation -- are
+      stated in two separate clauses of one semicolon-joined sentence.
+      Stage-1 correctly and consistently extracts these as TWO separate
+      AdoptionObservations under the isolated one-observation-per-call
+      architecture, and neither observation alone states all 3 required
+      D2 atomic predicates: the reliability clause never states a
+      login/activity level, and the login clause states no reliability
+      track record (only automation mode, e.g. "without manual
+      intervention," which the v3.2 calibration correctly no longer
+      treats as reliability evidence). AUTOMATION_RELIABLE_LOW_LOGIN_OK
+      is therefore correctly NOT expected to compose here. This
+      benchmark previously expected composition from the reliability
+      observation alone -- an expectation authored before the v3 atomic-
+      predicate architecture existed, which became structurally
+      unsatisfiable once cross-observation synthesis was deliberately
+      excluded by design (never a defect). Both individual atomic facts
+      remain true and are preserved below as optional-valid
+      observations; this case now exercises correct compound non-force-
+      fit abstention, mirroring case 07's existing precedent for the
+      identical split-clause pattern (case 07 has never expected this
+      compound to compose).
+    source_text: "The nightly data sync between the customer's ERP and our platform has run automatically without failure for the past six months; direct user logins remain low, which is expected since the integration handles the workflow without manual intervention."
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "The nightly data sync between the customer's ERP and our platform has run automatically without failure for the past six months"
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "direct user logins remain low, which is expected since the integration handles the workflow without manual intervention"
+    expected_dimension_d2_qualifiers: []
+    expected_dimension_d6_qualifiers: []
+
+  - id: "36_d2_qualifier_narrow_breadth_or_concentration"
+    description: >
+      Milestone 4B D2 qualifier coverage case 3 of 5. Real usage, but
+      narrow -- concentrated in one module/small user subset rather than
+      broad-based.
+    source_text: "Usage remains real but is concentrated entirely in the reporting module; only two of the eight licensed users have ever logged in, and none of the other platform features have been touched since onboarding."
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Usage remains real but is concentrated entirely in the reporting module; only two of the eight licensed users have ever logged in, and none of the other platform features have been touched since onboarding"
+    expected_dimension_d2_qualifiers:
+      - qualifier: "NARROW_BREADTH_OR_CONCENTRATION"
+        role: primary
+        supporting_observation_span_substrings:
+          - "Usage remains real but is concentrated entirely in the reporting module"
+    expected_dimension_d6_qualifiers: []
+
+  - id: "37_d2_qualifier_workflows_not_occurring"
+    description: >
+      Milestone 4B D2 qualifier coverage case 4 of 5. An intended
+      workflow that is simply not happening at all.
+    source_text: "The customer's team has not run the quarterly reconciliation workflow in the platform at all this year, despite it being a core part of their original implementation plan."
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "has not run the quarterly reconciliation workflow in the platform at all this year"
+    expected_dimension_d2_qualifiers:
+      - qualifier: "WORKFLOWS_NOT_OCCURRING"
+        role: primary
+        supporting_observation_span_substrings:
+          - "has not run the quarterly reconciliation workflow in the platform at all this year"
+    expected_dimension_d6_qualifiers: []
+
+  - id: "38_d2_qualifier_adoption_materially_deteriorating_unexplained"
+    description: >
+      Milestone 4B D2 qualifier coverage case 5 of 5. A material,
+      unexplained decline in previously-working adoption.
+    source_text: "Weekly active usage of the collaboration workspace has dropped from roughly 40 sessions to under 5 sessions over the past two months, and no one on the account has offered any explanation for the decline."
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Weekly active usage of the collaboration workspace has dropped from roughly 40 sessions to under 5 sessions over the past two months, and no one on the account has offered any explanation for the decline"
+    expected_dimension_d2_qualifiers:
+      - qualifier: "ADOPTION_MATERIALLY_DETERIORATING_UNEXPLAINED"
+        role: primary
+        supporting_observation_span_substrings:
+          - "Weekly active usage of the collaboration workspace has dropped from roughly 40 sessions to under 5 sessions over the past two months"
+    expected_dimension_d6_qualifiers: []
+
+  - id: "39_d6_qualifier_appropriate_sponsor_coverage"
+    description: >
+      Milestone 4B D6 qualifier coverage case 1 of 4. A healthy,
+      currently-engaged sponsor relationship.
+    source_text: "The VP of Operations remains the account's active executive sponsor and continues to join quarterly business reviews, alongside a day-to-day champion on the ops team who is fully engaged."
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "The VP of Operations remains the account's active executive sponsor and continues to join quarterly business reviews"
+    expected_dimension_d2_qualifiers: []
+    expected_dimension_d6_qualifiers:
+      - qualifier: "APPROPRIATE_SPONSOR_COVERAGE"
+        role: primary
+        supporting_observation_span_substrings:
+          - "The VP of Operations remains the account's active executive sponsor and continues to join quarterly business reviews"
+
+  - id: "40_d6_qualifier_champion_lost_vs_departure_unconfirmed"
+    description: >
+      Milestone 4B D6 qualifier coverage cases 2-3 of 4, combined into
+      one case deliberately: the trickiest pair to distinguish, flagged
+      explicitly during Milestone 4B architecture negotiation.
+      CHAMPION_DEPARTURE_UNCONFIRMED is for a genuine, unresolved signal
+      that does NOT clearly confirm an actual departure (Tom Reyes,
+      below) -- correct behavior must never collapse an unresolved signal
+      into a confirmed-departure qualifier just because a departure is
+      plausible. NORMALIZED (D6 EXPLICIT-basis composition gate
+      extension, benchmark audit; same principle previously applied to
+      Case 35): this case's Priya Nair facts -- confirmed departure, and
+      no successor/continuing coverage -- are stated in one semicolon-
+      joined clause of the source sentence, but a live D6-focused gate
+      probe (prompt_v4_4b_dimqual_v3_2_d6_explicit_gate_probe1) confirmed
+      stage-1 legitimately and consistently extracts these as TWO
+      separate StakeholderObservations under the frozen isolated one-
+      observation-per-call architecture. Each individual predicate is
+      correctly grounded and EXPLICIT, but because they resolve to two
+      different observations, no single observation's predicate set is
+      complete, so CHAMPION_LOST_NO_SUCCESSOR correctly does not compose
+      -- this is the frozen one-observation rule doing its job, not an
+      EXPLICIT-basis gate failure or a defect. This benchmark previously
+      expected composition from a single combined observation span -- an
+      expectation authored before stage-1's actual per-clause splitting
+      behavior on this sentence was verified live, which became
+      structurally unsatisfiable once cross-observation synthesis was
+      deliberately excluded by design (never a defect). Both individual
+      atomic facts remain true and are preserved below as two distinct
+      expected observations, matching what stage-1 actually and
+      correctly produces; CHAMPION_DEPARTURE_UNCONFIRMED for Tom Reyes is
+      completely unaffected and remains expected as before.
+    source_text: "Our champion Priya Nair has left the company as of last week, and the account team confirms no one else has taken over her responsibilities. Separately, the customer's secondary contact, Tom Reyes, has not responded to any messages in three weeks and his out-of-office reply mentions a possible move to a new role, though nothing has been confirmed about whether he has actually left the account."
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Our champion Priya Nair has left the company as of last week"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "the account team confirms no one else has taken over her responsibilities"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "the customer's secondary contact, Tom Reyes, has not responded to any messages in three weeks and his out-of-office reply mentions a possible move to a new role, though nothing has been confirmed about whether he has actually left the account"
+    expected_dimension_d2_qualifiers: []
+    expected_dimension_d6_qualifiers:
+      - qualifier: "CHAMPION_DEPARTURE_UNCONFIRMED"
+        role: primary
+        supporting_observation_span_substrings:
+          - "the customer's secondary contact, Tom Reyes, has not responded to any messages in three weeks"
+
+  - id: "41_d6_qualifier_succession_unclear_or_concentrated"
+    description: >
+      Milestone 4B D6 qualifier coverage case 4 of 4. Relationship
+      continuity concentrated in one person with no visible backup,
+      independent of any specific departure signal.
+    source_text: "All executive relationship activity on this account runs through a single contact, the Director of IT, with no other stakeholder identified as a backup; it is unclear who would take over the relationship if that person left."
+    expected_observations:
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "All executive relationship activity on this account runs through a single contact, the Director of IT, with no other stakeholder identified as a backup"
+    expected_dimension_d2_qualifiers: []
+    expected_dimension_d6_qualifiers:
+      - qualifier: "SUCCESSION_UNCLEAR_OR_CONCENTRATED"
+        role: primary
+        supporting_observation_span_substrings:
+          - "All executive relationship activity on this account runs through a single contact, the Director of IT, with no other stakeholder identified as a backup"
+
+  - id: "42_d2_d6_cooccurrence_and_non_force_fit"
+    description: >
+      Milestone 4B co-occurrence + non-force-fit case. Both a D2 and a D6
+      qualifier are correctly proposed from the SAME evidence batch (one
+      stage-2 call, two channels). A third, deliberately unremarkable
+      adoption observation is included as a non-force-fit probe -- the
+      correct behavior is proposing NO D2 qualifier for it (simple
+      omission from candidate_d2_qualifiers), since none of the 5 D2
+      qualifiers cleanly describe a minor, incidental workflow detail
+      with no adoption-health signal either way.
+    source_text: "The customer's onboarding workflow in the platform is being used exactly as intended by the operations team, with no issues reported. Their main sponsor, the COO, remains actively engaged and attends every quarterly review. Separately, the team also mentioned they occasionally export a small report to a spreadsheet for internal formatting, a minor and unremarkable detail with no bearing on adoption health."
+    expected_observations:
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "The customer's onboarding workflow in the platform is being used exactly as intended by the operations team, with no issues reported"
+      - type: STAKEHOLDER_OBSERVATION
+        basis: EXPLICIT
+        role: primary
+        span_substrings:
+          - "Their main sponsor, the COO, remains actively engaged and attends every quarterly review"
+      - type: ADOPTION_OBSERVATION
+        basis: EXPLICIT
+        role: optional-valid
+        span_substrings:
+          - "the team also mentioned they occasionally export a small report to a spreadsheet for internal formatting, a minor and unremarkable detail with no bearing on adoption health"
+    expected_dimension_d2_qualifiers:
+      - qualifier: "INTENDED_WORKFLOWS_OPERATING_NORMALLY"
+        role: primary
+        supporting_observation_span_substrings:
+          - "The customer's onboarding workflow in the platform is being used exactly as intended by the operations team, with no issues reported"
+    expected_dimension_d6_qualifiers:
+      - qualifier: "APPROPRIATE_SPONSOR_COVERAGE"
+        role: primary
+        supporting_observation_span_substrings:
+          - "Their main sponsor, the COO, remains actively engaged and attends every quarterly review"
+    must_not_extract:
+      - "a D2 qualifier proposed for the spreadsheet-export detail (non-force-fit correct behavior is proposing none for it)"
+    notes: "The third adoption observation (spreadsheet export) is intentionally NOT referenced by any expected_dimension_d2_qualifiers entry -- correct stage-2 behavior omits it from candidate_d2_qualifiers entirely."

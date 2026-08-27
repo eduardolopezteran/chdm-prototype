@@ -1,0 +1,59 @@
+# CHDM v0.1 Scenario Lab — S6
+# Static fixture (data only). Demonstrates INV-16 (an ordinary Mixed
+# dimension alone never produces OP2) alongside the CR-06 (Core
+# Automation/Integration Failure — Scenario-Lab-only per
+# registry/risk_mechanisms.yaml mvp_implementation_status) risk mechanism:
+# D2 = Mixed on its own would only ever justify OP3, but a separately
+# Current + Confirmed CR-06 Material condition (a real, activated risk,
+# not the dimension state itself) correctly drives Operational Priority to
+# OP2. The account's adoption *profile* (breadth/concentration) is
+# unchanged between the Mixed-alone case and this one — what changes
+# Operational Priority is the confirmed automation-risk activation, not
+# the dimension conclusion.
+
+scenario_id: S6
+title: "Mixed adoption breadth with a confirmed Material automation risk -> OP2"
+account_description: >
+  Fictional account whose product usage is narrow / concentrated in a
+  small user group (a Mixed-durability adoption signal on its own,
+  confirmed). Separately, a core workflow automation is confirmed
+  degraded/intermittently failing with meaningful workflow impact, though
+  a workaround exists — the Material condition for CR-06. No objective is
+  evaluated in this scenario — it isolates the D2/CR-06 interaction.
+
+lifecycle: L3
+not_yet_expected: false
+
+objective: null
+
+dimensions_to_evaluate: [D2]
+
+evidence:
+  - evidence_id: E-ADOPT-1
+    evidence_state: CURRENT_CONFIRMED
+  - evidence_id: E-AUTOMATION-1
+    evidence_state: CURRENT_CONFIRMED
+
+dimension_qualifier_signals:
+  - signal_id: E-D2-1
+    dimension: D2
+    evidence_id: E-ADOPT-1
+    qualifier: NARROW_BREADTH_OR_CONCENTRATION
+
+risk_severity_claims:
+  - signal_id: E-RISK-1
+    mechanism: CR-06
+    evidence_id: E-AUTOMATION-1
+    tier: MATERIAL
+
+expected:
+  objective_outcome_state: null
+  dimension_states:
+    D2: MIXED
+  dimension_reliability: {}
+  risk_records:
+    CR-06: {potential_severity: MATERIAL, activated_severity: MATERIAL}
+  dmeg_count: 0
+  reliability_level: HIGH
+  operational_priority: OP2
+  evidence_review: ER0

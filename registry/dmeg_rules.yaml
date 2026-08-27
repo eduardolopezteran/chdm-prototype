@@ -1,0 +1,82 @@
+# CHDM v0.1 — Decision-Material Evidence Gap (DMEG)
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §8
+methodology_version: "0.1"
+registry_object_type: RULE
+
+# Missing or unresolved evidence becomes a DMEG only if ALL THREE gates
+# are satisfied. This is CHDM's Differential Evaluation Primitive: run the
+# deterministic engine over the enumerable resolution-state-space of the
+# unresolved item and check whether the governed output differs.
+gates:
+  DMEG-1:
+    name: Requirement condition
+    condition: >
+      The evidence is currently UR, LR, or CR with its qualifying trigger
+      active. Supporting evidence does NOT satisfy DMEG-1 unless first
+      promoted to CR.
+  DMEG-2:
+    name: Decision dependency
+    condition: >
+      The evidence is linked to at least one materially governed
+      conclusion:
+    linked_conclusions:
+      - objective_outcome_or_D1
+      - activation_or_severity_of_material_or_critical_risk
+      - material_dimension_conclusion
+      - operational_priority
+  DMEG-3:
+    name: Outcome-variance test
+    condition: >
+      At least two methodologically permissible resolutions of the
+      unresolved evidence could produce materially different governed
+      conclusions. If plausible resolution cannot materially change a
+      conclusion, the missing evidence is NOT a DMEG even if it would be
+      useful to obtain.
+    enumerable_resolution_state_spaces:
+      observation_confirmation_status: [Confirmed, Rejected]
+      unresolved_contradiction: [resolved_toward_a, resolved_toward_b, remains_unresolved]
+      unresolved_dimension: [SUPPORTED, MIXED, CONCERNING, INSUFFICIENT_EVIDENCE, NOT_APPLICABLE]
+    prohibited: >
+      No code path may generate free-text hypothetical content to satisfy
+      DMEG-3. Potential->activated severity is never evaluated by directly
+      flipping the severity field — it is always evaluated by substituting
+      the underlying evidence's confirmation state and observing whether
+      severity changes as a downstream effect.
+
+# Consequences once >=1 DMEG exists.
+consequences:
+  evidence_review: ER1
+  overall_assessment_reliability: LOW
+  operational_priority:
+    if_no_op1_or_op2_already_established_and_dmeg_could_activate_op1_or_op2: OPU
+    if_op1_or_op2_already_established: >
+      confirmed operational priority remains; ER1 coexists with it (no
+      demotion, no OPU override — see INV-18)
+
+# §17.4 — Requirement / DMEG validation table (verbatim, CHDM v0.1's own
+# governed test cases — used directly as regression tests, not invented).
+validation_cases:
+  REQ-01:
+    scenario: One Supporting dimension unresolved; all material evidence sufficient.
+    expected: {IE_permitted: true, ER: ER0, OP: unchanged}
+  REQ-02:
+    scenario: Several Supporting dimensions unresolved; none can change D1/risk/priority.
+    expected: {missingness_visible: true, ER: ER0, overall_reliability_low_solely_from_gaps: false}
+  REQ-03:
+    scenario: One unresolved dimension could activate Material.
+    expected: {DMEG: true, reliability: LOW, ER: ER1, OP: "OPU if no OP1/OP2 already established"}
+  REQ-04:
+    scenario: One unresolved dimension could activate Critical.
+    expected: {DMEG: true, reliability: LOW, ER: ER1, OP: "OPU if no confirmed OP1/OP2"}
+  REQ-05:
+    scenario: L1; realized value unavailable but Not Yet Expected legitimate.
+    expected: {DMEG_from_absent_final_value_evidence: false}
+  REQ-06:
+    scenario: L4; no current credible value evidence.
+    expected: {D1: INSUFFICIENT_EVIDENCE, DMEG: true, reliability: LOW, ER: ER1, OP: "normally OPU absent established concern"}
+  REQ-07:
+    scenario: Strategic/Organizational evidence absent; no relevant signal.
+    expected: {automatic_ER1: false}
+  REQ-08:
+    scenario: Commercial Decision active; required commercial evidence unavailable.
+    expected: {D7_promoted_to_CR: true, DMEG: true, reliability: LOW, ER: ER1, OP: "OPU absent established concern"}

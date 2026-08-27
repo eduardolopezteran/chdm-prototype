@@ -1,0 +1,82 @@
+# CHDM v0.1 — Invalid States and Methodology Invariants
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §15
+methodology_version: "0.1"
+registry_object_type: SAFE
+
+# Fail-fast doctrine: any invariant violation raises an internal
+# consistency error and blocks rendering of that specific output — never
+# silently coerced to a nearby valid state, never silently dropped.
+enforcement: fail_fast
+on_violation: raise_internal_consistency_error
+
+invariants:
+  - id: INV-01
+    rule: A compensatory numerical master Customer Health Score presented as CHDM v0.1 output.
+  - id: INV-02
+    rule: Missing, unavailable or unknown evidence silently treated as favorable/healthy.
+  - id: INV-03
+    rule: Missing evidence converted to Not Applicable without a canonical applicability rule.
+  - id: INV-04
+    rule: Proxy Supported alone producing Objective Outcome = Achieved.
+  - id: INV-05
+    rule: Unverified Claim alone producing Objective Outcome = Achieved.
+  - id: INV-06
+    rule: AI-extracted Unverified evidence independently activating Material or Critical severity.
+  - id: INV-07
+    rule: Activated Material/Critical severity without Current + Confirmed evidence satisfying the governing rule.
+  - id: INV-08
+    rule: AI independently resolving a material contradiction.
+  - id: INV-09
+    rule: Positive evidence mathematically cancelling a confirmed material concern.
+  - id: INV-10
+    rule: Overall Assessment Reliability expressed numerically or as a percentage.
+  - id: INV-11
+    rule: Overall Assessment Reliability = Low while no DMEG exists.
+    aka: REL-01
+  - id: INV-12
+    rule: ER1 when no DMEG exists.
+  - id: INV-13
+    rule: ER0 while one or more DMEGs exist.
+  - id: INV-14
+    rule: OPU + ER0.
+  - id: INV-15
+    rule: OP1 with no Current + Confirmed Critical risk.
+  - id: INV-16
+    rule: OP2 created solely by ordinary Mixed evidence with no governed confirmed Material/review-triggering condition.
+  - id: INV-17
+    rule: OP3 where no OP1/OP2 is established but a DMEG could materially elevate priority.
+  - id: INV-18
+    rule: OPU replacing an already established OP1 or OP2; confirmed priority must remain and ER1 may coexist.
+  - id: INV-19
+    rule: P1/P2/P3/P4 presented as the current CHDM v0.1 priority architecture.
+  - id: INV-20
+    rule: Evidence Review represented as an ordinal severity rung.
+  - id: INV-21
+    rule: Historical assessment silently recalculated under a later methodology version.
+  - id: INV-22
+    rule: A predictive, causal or intervention-effect claim represented as a CHDM v0.1 diagnostic conclusion.
+
+# Contradiction limitation — explicit, verbatim from CHDM v0.1 §15:
+contradiction_limitation: >
+  No invariant is created here that would invent the unresolved D2-D8B
+  contradiction-to-state rule (UC-01). See contradiction_rules.yaml.
+
+# Milestone 1 required invariant subset (BAR-01 §6 exit criteria: "all six
+# invariants are correctly rejected when adversarially constructed").
+# These are the six enumerated in the Functional Spec §23.2 /
+# Technical Architecture §20, mapped onto their CHDM v0.1 INV- source:
+milestone_1_required_invariant_checks:
+  - name: "Priority Undetermined + ER0 is invalid"
+    source: INV-14
+  - name: "Low overall Reliability without a DMEG is invalid"
+    source: INV-11
+  - name: "Activated Material/Critical severity without Current + Confirmed evidence is invalid"
+    source: INV-07
+  - name: "Not Applicable without a governing applicability rule is invalid"
+    source: INV-03
+  - name: "ER1 without a reason code/DMEG is invalid"
+    source: INV-12
+    note: "also requires reason_codes.yaml evidence_review_reasons non-empty"
+  - name: "Governed deterministic output without a governing methodology rule is invalid"
+    source: [INV-01, INV-19]
+    note: "generalized: every governed output must cite a real Methodology Object + Reason Code (§13.4, §14)"

@@ -1,0 +1,313 @@
+# CHDM v0.1 — Dimension Model
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §4 (+ §7 lifecycle matrix)
+methodology_version: "0.1"
+registry_object_type: DIM
+
+# Canonical dimension-state vocabulary (MD-03), applies to D1-D7 and each
+# D8 subcomponent identically. D8 itself is an architectural grouping
+# only and has NO aggregate state (§4).
+dimension_state_vocabulary:
+  - SUPPORTED
+  - MIXED
+  - CONCERNING
+  - INSUFFICIENT_EVIDENCE
+  - NOT_APPLICABLE
+
+# §4.1 Lifecycle Requirement Matrix (verbatim).
+# S_CR means Supporting by default, promoted to CR when a canonical
+# trigger (defined per-dimension below) is active.
+lifecycle_requirement_matrix:
+  D1: {L1: LR, L2: LR, L3: LR, L4: LR}
+  D2: {L1: UR, L2: UR, L3: UR, L4: UR}
+  D3: {L1: LR, L2: LR, L3: S_CR, L4: S_CR}
+  D4: {L1: S_CR, L2: S_CR, L3: S_CR, L4: S_CR}
+  D5: {L1: S_CR, L2: S_CR, L3: S_CR, L4: S_CR}
+  D6: {L1: UR, L2: UR, L3: UR, L4: UR}
+  D7: {L1: S_CR, L2: S_CR, L3: S_CR, L4: S_CR}
+  D8A: {L1: S_CR, L2: S_CR, L3: S_CR, L4: S_CR}
+  D8B: {L1: S_CR, L2: S_CR, L3: S_CR, L4: S_CR}
+
+dimensions:
+
+  - code: D1
+    id: CHDM-DIM-VALUE-001
+    name: Value Realization
+    definition: >
+      Whether the customer is achieving the outcome that justified adoption
+      of the product.
+    principal_dependencies:
+      - primary_customer_objective
+      - objective_outcome_state
+      - value_evidence_basis
+      - lifecycle_expectation
+      - CR-08
+    requirement: LR  # all lifecycle stages, see lifecycle_requirement_matrix
+    lifecycle_rule:
+      L1: >
+        Primary objective or explicit Unknown, and whether outcome
+        realization is reasonably expected. Final realized-value evidence
+        is not required where Not Yet Expected legitimately applies.
+      L2: Credible evidence of progress toward initial value becomes required.
+      L3: >
+        Current progress or realized-outcome evidence is expected;
+        persistent absence can become decision-material.
+      L4: >
+        Current credible value evidence is required. Absence creates a D1
+        DMEG when the methodology cannot distinguish Achieved, Not
+        Achieved and Unknown. A D1 DMEG does not itself establish
+        unhealthy Customer Health.
+    state_rules:
+      SUPPORTED: >
+        Objective Outcome = Achieved; adequate current confirmed direct
+        evidence exists; no material contradiction remains.
+      MIXED: >
+        Examples: lifecycle-appropriate Progressing; qualified Achieved
+        evidence; positive progress at maturity without adequate direct
+        evidence; or D1 Disputed.
+      CONCERNING: >
+        Objective Outcome = Not Achieved where value should reasonably
+        have been realized, OR a confirmed Material/Critical value-risk
+        rule is active.
+      INSUFFICIENT_EVIDENCE: >
+        Objective Outcome = Unknown OR necessary evidence is
+        missing/stale/unverified.
+      NOT_APPLICABLE: only under a canonical applicability rule; no blanket D1 N/A rule exists.
+    special_contradiction_rule:
+      trigger: objective_outcome == DISPUTED
+      effect: {dimension_state: MIXED, dimension_reliability: LOW}
+      note: >
+        Deterministic and registerable (§4.2, §12.2), unless a separate
+        confirmed Material/Critical rule independently establishes higher
+        operational consequence.
+    reason_references: [REQ-LR-VALUE-L1, REQ-LR-VALUE-L4, ER-DMEG-VALUE]
+    risk_dependency: [CR-08]
+
+  - code: D2
+    id: CHDM-DIM-ADOPTION-001
+    name: Product Adoption
+    definition: >
+      Whether relevant users, workflows, automation and integrations use
+      the product in a manner consistent with the intended use case.
+    core_evidence:
+      - core_workflow_use
+      - expected_cadence
+      - role_user_coverage
+      - breadth_and_depth
+      - concentration
+      - automation_integration_use
+      - parallel_or_repository_only_behavior
+    requirement: UR  # all lifecycle stages
+    lifecycle_rule:
+      L1: intended workflow activation/readiness and deployment progression.
+      L2: initial meaningful workflow use.
+      L3: sustained/broadened use and institutionalization.
+      L4: durable use, dependency, concentration and automation context.
+    state_rules:
+      SUPPORTED: >
+        Intended workflows operate at the appropriate lifecycle/cadence
+        with no material concentration, passive-use or workflow-depth
+        concern.
+      MIXED: >
+        Use exists but material qualifiers weaken durability, such as
+        narrow breadth or concentration.
+      CONCERNING: >
+        Intended workflows are not occurring, adoption is materially
+        deteriorating without known explanation, or activity is
+        substantially disconnected from intended use.
+      INSUFFICIENT_EVIDENCE: Meaningful intended-workflow use cannot be determined.
+      NOT_APPLICABLE: only through a canonical applicability rule.
+    safeguards:
+      - login count alone cannot establish Supported
+      - high aggregate usage cannot erase severe concentration
+      - low human login is not adverse where reliable automation performs the intended workflow
+      - repository-only activity is not automatically meaningful adoption
+    reason_references: [REQ-UR-ADOPTION, ER-DMEG-DIMENSION]
+    risk_dependency: [CR-06, CR-07]
+
+  - code: D3
+    id: CHDM-DIM-ENGAGEMENT-001
+    name: Customer Engagement
+    definition: >
+      Whether appropriate customer stakeholders actively and reciprocally
+      participate in advancing the relationship and intended outcomes.
+    core_evidence:
+      - relevant_stakeholder_participation
+      - reciprocity
+      - customer_initiated_interaction
+      - response_behavior
+      - commitment_action_completion
+      - appropriate_executive_involvement
+    requirement:
+      L1: LR
+      L2: LR
+      L3: S_CR
+      L4: S_CR
+    cr_triggers:
+      - stalled required commitments
+      - material engagement deterioration
+      - customer action required for a success-plan dependency
+      - interaction evidence materially contradicting relationship evidence
+      - another relationship or champion-risk rule depending on engagement evidence
+    state_rules:
+      SUPPORTED: Appropriate stakeholders participate and commitments progress reciprocally.
+      MIXED: Engagement is narrow, largely provider-driven, irregular or concentrated.
+      CONCERNING: >
+        Required stakeholders repeatedly disengage, material commitments
+        stall or responsiveness materially deteriorates.
+      INSUFFICIENT_EVIDENCE: Meaningful engagement quality cannot be established.
+      NOT_APPLICABLE: canonical applicability rule only.
+    safeguards:
+      - CSM activity volume is not customer engagement by itself
+    reason_references: [REQ-LR-ENGAGEMENT-L1, ER-DMEG-DIMENSION]
+    risk_dependency: []
+
+  - code: D4
+    id: CHDM-DIM-EXPERIENCE-001
+    name: Experience and Sentiment
+    definition: What relevant customer stakeholders report or express about their experience.
+    eligible_evidence: [NPS, CSAT, CES, complaints, qualitative_feedback, reference_willingness, grounded_sentiment_evidence]
+    requirement: S_CR  # Supporting by default at all lifecycle stages
+    cr_triggers:
+      - significant complaint
+      - negative customer statement
+      - material survey result
+      - conflicting stakeholder feedback
+      - experience evidence capable of altering another governed risk determination
+    state_rules:
+      SUPPORTED: >
+        Current sufficiently relevant feedback is favorable and no
+        material contradictory experience evidence exists.
+      MIXED: >
+        Stakeholder/channel evidence differs, coverage is narrow, or
+        meaningful positive and negative signals coexist.
+      CONCERNING: >
+        Current relevant evidence identifies dissatisfaction, recurring
+        complaints or material loss of confidence.
+      INSUFFICIENT_EVIDENCE: Current representative experience evidence is absent.
+      NOT_APPLICABLE: canonical applicability rule only.
+    safeguards:
+      - "NPS safeguard: NPS is one evidence object. It does not independently define Customer Health, renewal risk, Value Realization, or override a critical risk. Respondent, timing and coverage remain material context."
+    reason_references: [REQ-S-EXPERIENCE, ER-DMEG-DIMENSION]
+    risk_dependency: []
+
+  - code: D5
+    id: CHDM-DIM-SERVICE-001
+    name: Support and Service Performance
+    definition: Whether service, product reliability and issue handling support viable continued use.
+    core_evidence: [unresolved_material_incidents, severity, recurrence, business_interruption, resolution, sla_performance_expectations, defect_exposure]
+    requirement: S_CR
+    cr_triggers:
+      - a current/recent material incident exists
+      - a core workflow may be impaired
+      - an SLA/service obligation is material
+      - the service condition could activate CR-02 or CR-06
+      - support evidence materially contradicts apparent account condition
+    state_rules:
+      SUPPORTED: No unresolved material service condition and performance is consistent with expected operation.
+      MIXED: Issues exist but are contained, temporary or under credible resolution.
+      CONCERNING: >
+        Material unresolved incident, significant recurrent failure,
+        sustained interruption or unresolved business-impacting defect.
+      INSUFFICIENT_EVIDENCE: Material service condition cannot be determined.
+      NOT_APPLICABLE: canonical applicability rule only.
+    safeguards:
+      - "Ticket volume is not directional by itself. High volume may indicate adoption or failure; low volume may indicate stability or disengagement."
+    reason_references: [REQ-CR-SERVICE-SIGNAL]
+    risk_dependency: [CR-02, CR-06]
+
+  - code: D6
+    id: CHDM-DIM-RELATIONSHIP-001
+    name: Relationship Health
+    definition: The resilience and breadth of stakeholder support for the customer-product relationship.
+    core_evidence: [champion_status_and_influence, sponsor_economic_authority, executive_access, stakeholder_breadth, detractors, succession_coverage]
+    requirement: UR
+    notes: >
+      Requires enough stakeholder evidence to assess meaningful
+      champion/sponsor coverage, relationship concentration, and known or
+      unresolved continuity dependency. An executive sponsor is not
+      mandatory in every account. Complete absence of meaningful
+      stakeholder evidence normally creates a DMEG because CR-01 can
+      become Critical.
+    state_rules:
+      SUPPORTED: Appropriate influence, sponsor coverage and sufficient stakeholder breadth exist.
+      MIXED: Support exists but is concentrated, sponsor access is weak or succession is unclear.
+      CONCERNING: >
+        Material champion/sponsor relationship deteriorates, influence is
+        lost, significant detractor risk exists or the relationship is
+        dangerously single-threaded.
+      INSUFFICIENT_EVIDENCE: Stakeholder influence/coverage cannot be established.
+      NOT_APPLICABLE: canonical applicability rule only.
+    reason_references: [REQ-UR-RELATIONSHIP]
+    risk_dependency: [CR-01]
+
+  - code: D7
+    id: CHDM-DIM-COMMERCIAL-001
+    name: Commercial Health
+    definition: Whether the commercial relationship can continue without a currently known material barrier.
+    core_evidence: [renewal_commercial_decision_context, payment_status, budget, procurement, legal, pricing, competition_replacement, contract_utilization]
+    requirement: S_CR
+    cr_triggers:
+      - "Commercial Decision Active = Yes"
+      - renewal/procurement/legal process is active
+      - payment, budget or pricing evidence indicates material friction
+      - competitive/replacement evidence exists
+      - another commercial-risk rule may be activated
+    deterministic_promotion:
+      overlay: COMMERCIAL_DECISION_ACTIVE
+      value: Yes
+      effect: promotes D7 to CR
+      note: "An active commercial decision therefore deterministically promotes D7 to CR (§4.8, §6.4)."
+    state_rules:
+      SUPPORTED: No material commercial blocker is known and required processes proceed normally.
+      MIXED: Friction/uncertainty exists without a confirmed barrier.
+      CONCERNING: >
+        Confirmed budget, payment, procurement, legal, pricing or
+        competitive conditions materially threaten continuation.
+      INSUFFICIENT_EVIDENCE: Commercial condition cannot be determined.
+      NOT_APPLICABLE: only where a canonical applicability rule establishes that no commercial construct genuinely exists.
+    safeguards:
+      - "Historical renewal is not proof of present health; contractual inertia may preserve revenue despite deterioration."
+    reason_references: [REQ-CR-COMMERCIAL-DECISION, ER-DMEG-COMMERCIAL]
+    risk_dependency: [CR-03]
+
+  - code: D8A
+    id: CHDM-DIM-STRATEGIC-001
+    name: Strategic Alignment
+    definition: >
+      Whether the product/use case remains aligned with the customer's
+      relevant strategic, architectural and operating direction.
+    evidence_includes: [current_strategic_priority, roadmap_use_case_fit, architecture_technology_direction, vendor_consolidation_intent, replacement_planning, regulatory_compatibility]
+    requirement: S_CR
+    cr_triggers: [replacement, vendor_consolidation, roadmap_incompatibility, architecture_change, material_strategic_reprioritization, "another condition capable of activating CR-04"]
+    state_rules_reference: dimension_state_vocabulary  # Supported/Mixed/Concerning/Insufficient Evidence/Not Applicable — no dimension-specific overrides given beyond CR trigger list
+    notes: "Routine absence of strategic information does not automatically create Evidence Review."
+    reason_references: [REQ-CR-STRATEGIC-SIGNAL]
+    risk_dependency: [CR-04]
+
+  - code: D8B
+    id: CHDM-DIM-ORGRISK-001
+    name: Organizational Risk
+    definition: >
+      Organizational conditions capable of materially affecting the
+      customer's ability, authority or continuity to sustain the
+      relationship.
+    evidence_includes: [leadership_change, acquisition_ma, restructuring, layoffs, budget_reduction, financial_deterioration, organizational_shutdown, significant_ownership_change]
+    requirement: S_CR
+    cr_triggers: [leadership_change, acquisition, restructuring, financial_deterioration, material_budget_action, organizational_shutdown_or_change]
+    canonical_state_vocabulary_note: >
+      MD-03 common vocabulary (Supported/Mixed/Concerning/Insufficient
+      Evidence/Not Applicable) governs D8B. Legacy specialized wording
+      (No Material Concern Identified / Material Event Under Review /
+      Concerning / Insufficient Evidence / Not Applicable) is
+      non-canonical and MUST NOT be emitted by the engine. No one-to-one
+      alias (e.g. "Material Event Under Review = Mixed") is established —
+      the organizational event is evidence/trigger input; the canonical
+      D8B state is produced via the same common dimension methodology as
+      every other dimension.
+    notes: "Absence of Strategic/Organizational evidence with no relevant signal does not by itself require Evidence Review."
+    reason_references: [REQ-CR-ORG-EVENT]
+    risk_dependency: [CR-05]
+
+# D8 (grouping) has no aggregate state — D8A and D8B are independently
+# governed dimensions, never merged or averaged.
+d8_is_grouping_only: true

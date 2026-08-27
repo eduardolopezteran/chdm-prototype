@@ -1,0 +1,59 @@
+# CHDM v0.1 — Lifecycle Model
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §2
+# Methodology version this registry file represents: 0.1
+methodology_version: "0.1"
+registry_object_type: LIFE
+
+lifecycle_stages:
+  - code: L1
+    id: CHDM-LIFE-L1-001
+    name: Implementation / Migration
+    canonical_meaning: >
+      Customer is configuring, deploying, migrating, integrating or preparing
+      intended workflows.
+  - code: L2
+    id: CHDM-LIFE-L2-001
+    name: Initial Value
+    canonical_meaning: >
+      Product is live and the customer is attempting to establish the first
+      meaningful business outcome.
+  - code: L3
+    id: CHDM-LIFE-L3-001
+    name: Adoption / Institutionalization
+    canonical_meaning: >
+      Initial use/value exists and the customer is broadening, deepening or
+      embedding use.
+  - code: L4
+    id: CHDM-LIFE-L4-001
+    name: Mature / Optimization
+    canonical_meaning: >
+      Product is established in ongoing operations and attention shifts
+      toward durable value, resilience and optimization.
+
+# Renewal is explicitly NOT a lifecycle stage (§2).
+renewal_is_lifecycle_stage: false
+
+# Independent overlays (§2). Both are Yes/No and orthogonal to lifecycle stage.
+overlays:
+  - code: RECOVERY
+    id: CHDM-LIFE-OVERLAY-RECOVERY-001
+    name: Recovery
+    values: [Yes, No]
+    canonical_meaning: An existing material condition is under remediation.
+  - code: COMMERCIAL_DECISION_ACTIVE
+    id: CHDM-LIFE-OVERLAY-COMMERCIAL-001
+    name: Commercial Decision Active
+    values: [Yes, No]
+    canonical_meaning: >
+      Renewal, procurement, budget, legal or replacement activity is
+      currently material. When Yes, deterministically promotes D7 to CR
+      (§4.8, §6.4).
+
+# FR: Lifecycle must be a deliberate human declaration; never inferred
+# (Functional Spec FR-4.1; CHDM §2 "Lifecycle changes what evidence is
+# reasonably expected").
+lifecycle_declaration:
+  human_declared: true
+  ai_may_suggest: true
+  ai_may_set_deterministic_value: false
+  immutable_per_assessment: true

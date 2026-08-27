@@ -1,0 +1,91 @@
+"""
+Milestone 3B/3D — Diagnostic Result / Why / Uncertainty panel.
+
+Renders exactly what confirmation.recompute.recompute() returned in
+state.current_diagnostic -- never a client-side patched value. Covers
+steps 1-3 of the approved sequence: diagnostic result -> why -> uncertainty.
+"""
+from __future__ import annotations
+
+import streamlit as st
+
+from confirmation.enums import ObjectiveResolutionStatus
+from .labels import EVIDENCE_REVIEW_LABEL, OPERATIONAL_PRIORITY_LABEL
+
+_READ_ONLY_DIMENSIONS = {"D2", "D6"}  # M3-OD-01 unresolved -- see MANIFEST.txt
+
+# Milestone 3D — plain-language framing for ObjectiveResolution.status.
+# Deliberately distinguishes "no confirmed evidence yet" from "confirmed
+# evidence conflicts" (approved checkpoint constraint: the UI must
+# explicitly state WHICH of these is the reason Objective Outcome is
+# Unknown, never leave it as an undifferentiated "Unknown"). Purely a
+# display concern -- objective_resolution itself carries no governed
+# CHDM state (confirmation/schemas.py's ObjectiveResolution docstring).
+_OBJECTIVE_STATUS_LABEL = {
+    ObjectiveResolutionStatus.ESTABLISHED: "Objective established",
+    ObjectiveResolutionStatus.NOT_ESTABLISHED: "Objective not yet established",
+    ObjectiveResolutionStatus.CONFLICTING: "Objective identity unresolved -- confirmed statements conflict",
+}
+
+
+def _render_objective_resolution(state) -> None:
+    res = state.current_diagnostic.objective_resolution
+    label = _OBJECTIVE_STATUS_LABEL.get(res.status, res.status.value)
+    if res.status == ObjectiveResolutionStatus.ESTABLISHED:
+        st.write(f"**{label}:** {res.text}")
+    elif res.status == ObjectiveResolutionStatus.CONFLICTING:
+        st.warning(
+            f"**{label}.** {len(res.conflicting_observation_ids)} confirmed objective statements "
+            "disagree with each other. This -- not simply missing evidence -- is why Objective "
+            "Outcome is Unknown below. Reject or Correct all but one confirmed statement to resolve it."
+        )
+    else:
+        st.write(f"**{label}.** No confirmed evidence yet states what this account is trying to achieve.")
+
+
+def render(state) -> None:
+    result = state.current_diagnostic.result
+
+    st.subheader("Diagnostic Result")
+    cols = st.columns(4)
+    op_label = OPERATIONAL_PRIORITY_LABEL.get(result.operational_priority.value, result.operational_priority.value.value)
+    er_label = EVIDENCE_REVIEW_LABEL.get(result.evidence_review.value, result.evidence_review.value.value)
+    cols[0].metric("Operational Priority", op_label)
+    cols[1].metric("Evidence Review", er_label)
+    cols[2].metric("Reliability", result.reliability.level.value)
+    obj_state = result.objective_outcome.state.value if result.objective_outcome else "N/A"
+    cols[3].metric("Objective Outcome", obj_state)
+
+    _render_objective_resolution(state)
+
+    with st.expander("Why this result", expanded=False):
+        st.write(f"**Operational Priority:** {result.operational_priority.reason_code.human_readable_text}")
+        for dim, dim_state in result.dimension_states.items():
+            readonly_note = (
+                " _(read-only in the current MVP confirmation workflow -- M3-OD-01 unresolved)_"
+                if dim.value in _READ_ONLY_DIMENSIONS else ""
+            )
+            st.write(
+                f"**Dimension {dim.value}:** {dim_state.state.value} "
+                f"(dimension reliability: {dim_state.dimension_reliability}){readonly_note}  \n"
+                f"{dim_state.reason_code.human_readable_text}"
+            )
+        for mech, risk in result.risk_records.items():
+            potential = risk.potential_severity.value if risk.potential_severity else "None"
+            activated = risk.activated_severity.value if risk.activated_severity else "None"
+            st.write(f"**Risk {mech.value}:** potential={potential}, activated={activated}")
+
+    is_er1 = result.evidence_review.value.value == "ER1"
+    with st.expander("Uncertainty", expanded=is_er1):
+        st.write(f"**Evidence Review status:** {result.evidence_review.value.value}")
+        if not result.dmegs:
+            st.write("No open DMEGs (Decision-Material Evidence Gaps).")
+        else:
+            for dmeg in result.dmegs:
+                st.write(
+                    f"- **{dmeg.dmeg_id}** on `{dmeg.subject_construct_ref}` "
+                    f"(affects Operational Priority: {dmeg.affects_operational_priority}) — "
+                    f"{dmeg.reason_code}"
+                )
+        limiting = ", ".join(result.reliability.limiting_factor_refs) or "None"
+        st.write(f"**Reliability limiting factors:** {limiting}")

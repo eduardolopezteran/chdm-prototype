@@ -1,0 +1,13 @@
+.env
+.env.*
+.streamlit/secrets.toml
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+_frag_experiment.py
+_frag_test.py
+_smoke_3e_tmp.py
+_smoke_4a_tmp.py
+MANIFEST.txt

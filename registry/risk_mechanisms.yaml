@@ -1,0 +1,213 @@
+# CHDM v0.1 — Risk Model
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §6
+methodology_version: "0.1"
+registry_object_type: RISK
+
+# §6.1 — Risk architecture. Progressive severity; not every risk must
+# traverse every stage (sudden events may move directly to Critical).
+severity_progression: [WATCH, MATERIAL, CRITICAL, RESOLVED]
+
+# Severity and evidence status are independent axes (§6.1).
+risk_record_axes:
+  - potential_severity     # WATCH | MATERIAL | CRITICAL | null
+  - activated_severity      # WATCH | MATERIAL | CRITICAL | null — see activation_rule
+  - evidence_status
+
+activation_rule:
+  condition: >
+    Activated Material or Critical severity requires Current + Confirmed
+    evidence satisfying the canonical severity condition for that
+    mechanism.
+  unconfirmed_ai_extraction_may: [identify_potential_severity]
+  unconfirmed_ai_extraction_may_not: [activate_severity]
+
+# Operational effect is uniform across all mechanisms (§6.2-§6.9):
+#   activated MATERIAL -> OP2
+#   activated CRITICAL  -> OP1
+operational_effect_rule:
+  MATERIAL: OP2
+  CRITICAL: OP1
+
+# MVP implementation scope (Functional Spec §15.3 / BAR-01 §4 — a scoping
+# decision, not a CHDM change; CR-04/05/07 remain part of the frozen
+# methodology and are registered below in full, but the Milestone 1
+# engine does not evaluate them against live evidence).
+mvp_implementation_status:
+  CR-01: implemented
+  CR-02: implemented
+  CR-03: implemented
+  CR-08: implemented
+  CR-06: scenario_lab_only
+  CR-04: deferred
+  CR-05: deferred
+  CR-07: deferred
+
+risk_mechanisms:
+
+  - code: CR-01
+    id: CHDM-RISK-CHAMPION-001
+    name: Sponsor / Champion Continuity
+    mechanism: >
+      Loss or concentration of influential stakeholder support may weaken
+      access, decisions and sponsorship.
+    severity_conditions:
+      WATCH: >
+        Material dependence on one influential champion/sponsor with weak
+        or absent succession coverage.
+      MATERIAL: >
+        Champion/sponsor is confirmed to be leaving, changing role, losing
+        influence or withdrawing support, but a plausible incomplete
+        successor/coverage plan exists.
+      CRITICAL: >
+        Material champion/sponsor has left or withdrawn support and no
+        confirmed effective successor or equivalent coverage exists.
+    required_evidence: [stakeholder_identity, role_influence, status, succession_coverage]
+    confirmation_required_for: [MATERIAL, CRITICAL]  # qualitative determination
+    lifecycle: [L1, L2, L3, L4]
+    persistence: until continuity is re-established or dependency becomes irrelevant
+    resolution: confirmed effective successor / equivalent coverage
+    dimension: D6
+    validation_ref: [V2, V3]
+
+  - code: CR-02
+    id: CHDM-RISK-SERVICE-001
+    name: Service Failure
+    severity_conditions:
+      WATCH: Recurrent/elevated service issue with contained business impact.
+      MATERIAL: >
+        Current confirmed failure has meaningful business impact, with
+        credible resolution underway.
+      CRITICAL: >
+        Current business-impacting failure is unresolved, recurrent
+        without adequate control, or lacks a credible recovery path.
+    required_evidence: [incident_condition, severity, business_impact, recurrence, resolution_status]
+    confirmation_required_for: [qualitative_impact]
+    lifecycle: [L1, L2, L3, L4]
+    persistence: until impact is controlled
+    resolution: root condition resolved or acceptable verified workaround/control established
+    dimension: D5
+    validation_ref: [V1, V2, V3]
+
+  - code: CR-03
+    id: CHDM-RISK-COMMERCIAL-001
+    name: Commercial Continuity
+    severity_conditions:
+      WATCH: Emerging commercial friction without a confirmed barrier.
+      MATERIAL: >
+        Confirmed friction creates credible continuation risk but a
+        feasible resolution path remains.
+      CRITICAL: Confirmed condition currently blocks or effectively precludes continuation.
+    required_evidence: [commercial_issue, status, decision_authority, contractual_procurement_context]
+    confirmation_required_for: [qualitative_commercial_claims]
+    lifecycle: [L2, L3, L4]
+    lifecycle_note: "possible in L1"
+    persistence: until friction/blocker closes or becomes irrelevant
+    resolution: confirmed commercial path restored
+    dimension: D7
+    validation_ref: [V2, V3]
+
+  - code: CR-04
+    id: CHDM-RISK-STRATEGIC-001
+    name: Strategic Displacement
+    severity_conditions:
+      WATCH: Strategic direction/roadmap creates plausible future incompatibility.
+      MATERIAL: Customer actively evaluates replacement, consolidation or incompatible architecture.
+      CRITICAL: Confirmed strategic decision commits to displacement, replacement or exclusion.
+    required_evidence: [current_strategic_decision_event, product_relevance]
+    confirmation_required_for: [MATERIAL, CRITICAL]
+    confirmation_exception: "unless authoritative structured evidence establishes it"
+    lifecycle: [L2, L3, L4]
+    lifecycle_note: "most relevant L2-L4"
+    persistence: until decision reverses, scope changes or product continuity is established
+    resolution: confirmed compatibility or reversal
+    dimension: D8A
+    validation_ref: [V2, V3]
+
+  - code: CR-05
+    id: CHDM-RISK-ORGCONTINUITY-001
+    name: Organizational Continuity
+    severity_conditions:
+      WATCH: Material organizational event exists but account impact is unknown.
+      MATERIAL: >
+        Event is confirmed to affect budget, ownership, staffing, decision
+        authority or operational continuity.
+      CRITICAL: >
+        Event materially prevents or is expected to terminate the
+        customer's ability to sustain the relationship.
+    required_evidence: [organizational_event, customer_product_account_impact]
+    confirmation_required_for: [MATERIAL, CRITICAL]
+    confirmation_exception: "unless authoritative direct evidence establishes impact"
+    lifecycle: [L1, L2, L3, L4]
+    persistence: while impact remains unresolved
+    resolution: new organizational condition confirms continuity or risk no longer applies
+    dimension: D8B
+    validation_ref: [V2, V3]
+    safeguard: "The organizational event alone does not establish Critical severity. Its material relationship impact must be established."
+
+  - code: CR-06
+    id: CHDM-RISK-AUTOMATION-001
+    name: Core Automation / Integration Failure
+    severity_conditions:
+      WATCH: >
+        Important workflow is highly dependent on a single
+        automation/integration, creating meaningful dependency
+        concentration.
+      MATERIAL: >
+        Dependency is degraded or intermittently failing with meaningful
+        workflow impact, but a workaround/recovery path exists.
+      CRITICAL: >
+        Core dependency is failing with material current impact and no
+        effective fallback or timely recovery.
+    required_evidence: [workflow_dependency, technical_status, impact, fallback_recovery]
+    confirmation_required_for: [business_impact_not_directly_measurable]
+    lifecycle: [L1, L2, L3, L4]
+    lifecycle_note: "once dependency exists"
+    persistence: while exposure/failure persists
+    resolution: reliable integration restored or effective alternative established
+    dimension: [D2, D5]
+    dimension_note: "D2 and D5 relationship"
+    validation_ref: [V2]
+    validation_note: "exact implementation thresholds remain methodology assumptions"
+
+  - code: CR-07
+    id: CHDM-RISK-IMPLEMENTATION-001
+    name: Implementation Failure
+    severity_conditions:
+      WATCH: Material prerequisite/milestone trending late or at risk.
+      MATERIAL: Confirmed milestone/prerequisite failure blocks progress but credible recovery exists.
+      CRITICAL: >
+        Path toward usable deployment/initial value is materially blocked
+        with no credible recovery path.
+    required_evidence: [required_prerequisite_milestone, expected_timing, actual_state, recovery_plan]
+    confirmation_required_for: [qualitative_recovery_path_judgment]
+    lifecycle: [L1]
+    lifecycle_note: "may carry into L2"
+    persistence: until blocking condition resolves
+    resolution: prerequisite/milestone completed or validated alternative path established
+    dimension: [D2, D1]
+    dimension_note: "according to mechanism"
+    validation_ref: [V2, V3]
+
+  - code: CR-08
+    id: CHDM-RISK-VALUEFAILURE-001
+    name: Value Failure / Rejection
+    severity_conditions:
+      WATCH: >
+        Value evidence remains weak or proxy-only beyond the lifecycle
+        point at which stronger evidence is expected.
+      MATERIAL: >
+        Current confirmed evidence indicates the intended outcome is
+        materially off track or the customer materially questions value.
+      CRITICAL: >
+        Relevant customer decision-maker explicitly rejects achieved value
+        or confirms that the product is not delivering the outcome that
+        justified the relationship.
+    required_evidence: [objective, expected_outcome, current_result, customer_value_evidence]
+    confirmation_required_for: [customer_statements, qualitative_outcome_judgments]
+    lifecycle: [L2, L3, L4]
+    lifecycle_note: "L1 only where a value expectation already applies"
+    persistence: "until value gap resolves, objective is legitimately redefined or governing evidence changes"
+    resolution: current confirmed evidence establishes restored progress/achievement
+    dimension: D1
+    validation_ref: [V1, V2, V3]
+    validation_note: "objective/value distinction V1/V2; exact progression V3"

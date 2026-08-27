@@ -1,0 +1,63 @@
+# CHDM v0.1 — Canonical Doctrine
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §1
+methodology_version: "0.1"
+registry_object_type: SAFE
+
+purpose: >
+  CHDM evaluates the current condition of a customer × product/use-case
+  relationship and supports the decision: "Does this customer-product
+  relationship require attention now, and what condition or evidence gap
+  should be investigated first?" It is a diagnostic decision-support
+  methodology for a Customer Success Manager.
+
+condition_not_probability:
+  does_not_estimate:
+    - churn_probability
+    - renewal_probability
+    - contraction_probability
+    - expansion_probability
+    - intervention_effectiveness
+  note: "Current condition and future-outcome probability are analytically distinct."
+
+non_compensatory_doctrine:
+  no_numerical_master_score: true
+  separately_visible_mechanisms:
+    - objective_outcome
+    - value_evidence_basis
+    - dimension_states
+    - risk_mechanisms
+    - assessment_reliability
+    - operational_priority
+    - evidence_review
+  rule: >
+    Positive performance in one area cannot mathematically erase a
+    material problem in another (MD-01).
+  invariant_refs: [INV-01, INV-09]
+
+unknown_is_valid:
+  permitted_states: [Unknown, Insufficient Evidence, Unavailable, Stale, unresolved_contradiction]
+  rule: >
+    Missing evidence is neither favorable nor unfavorable. The methodology
+    must not manufacture certainty merely to produce a favorable or
+    determined result.
+  invariant_refs: [INV-02]
+
+epistemic_sequence:
+  base: "Source Evidence -> Evidence Status -> Deterministic Classification -> Interpretation"
+  with_ai: "Source Evidence -> AI Candidate Extraction -> Human Confirmation where material -> Deterministic Evaluation -> Grounded AI Interpretation"
+  rule: >
+    Unconfirmed AI output is not an established customer fact and cannot
+    independently create a consequential CHDM conclusion.
+
+claim_boundary:
+  may_describe_as: "evidence-informed, reproducible diagnostic methodology for multidimensional Customer Health"
+  may_not_claim:
+    - a customer has a stated probability of churn or renewal
+    - OP1 or any other state predicts churn
+    - a proposed action will cause improved retention
+    - CHDM has been proven to reduce churn
+    - objective achievement is the universal determinant of retention
+  no_locally_validated_v4_rules: true
+  invariant_refs: [INV-22]
+
+validation_status: "evidence-informed, locally unvalidated diagnostic methodology"

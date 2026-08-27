@@ -1,0 +1,85 @@
+# CHDM v0.1 — Contradiction Rules
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §12, §19 (UC-01)
+methodology_version: "0.1"
+registry_object_type: RULE
+
+# ============================ §12.1 — General governed behavior ============================
+# Applies to ALL dimensions/contradictions. Fully safe to implement.
+general_governed_behavior:
+  contradictory_evidence_must:
+    - remain visible
+    - preserve both underlying sources
+  contradictory_evidence_must_not:
+    - be averaged
+    - be silently discarded
+    - be resolved by AI
+  resolution_paths:
+    - underlying item corrected or invalidated
+    - human confirms contextual evidence establishing the items are not actually contradictory
+  unverified_ai_detected_contradiction: >
+    Remains a candidate contradiction until the governing confirmation
+    boundary is met.
+  may_create: [CR_requirement, DMEG]
+  create_condition: "where its resolution could materially alter a governed conclusion"
+
+# ============================ §12.2 — D1 contradiction (fully governed) ============================
+# This is the ONLY dimension with a frozen, deterministic
+# contradiction-to-Dimension-State rule. Fully safe to implement and
+# register. This is what Scenario S4 exercises.
+d1_contradiction_rule:
+  status: FULLY_GOVERNED
+  trigger: >
+    Current + Confirmed evidence supports both Achieved and Not Achieved
+    for the same objective.
+  deterministic_effect:
+    objective_outcome: DISPUTED
+    dimension: D1
+    dimension_state: MIXED
+    dimension_reliability: LOW
+  additional:
+    - both evidence bases remain visible
+    - AI cannot resolve the conflict
+  registerable: true
+
+# ======================= §12.3 / §19 UC-01 — D2-D8B contradiction (UNRESOLVED) =======================
+# STOP marker. Do not implement or invent a general deterministic
+# contradiction -> Dimension State rule for dimensions other than D1.
+# Per BAR-01 §2 and CHDM v0.1 §19 UC-01, this is explicitly isolated, not
+# inferred. The engine MUST raise an explicit "unresolved methodology
+# path" condition rather than silently computing or defaulting a
+# Dimension State when this path is hit — it must never guess Mixed (or
+# any other state) as if it were a governed conclusion.
+unresolved_general_contradiction_rule:
+  id: UC-01
+  status: "UNRESOLVED — GOVERNED CLARIFICATION REQUIRED"
+  applies_to_dimensions: [D2, D3, D4, D5, D6, D7, D8A, D8B]
+  exact_issue: >
+    CHDM does not yet contain a sufficiently binding rule specifying which
+    canonical Dimension State must result when contradictory Current +
+    Confirmed evidence materially contributes to a dimension other than D1
+    and the conflict cannot be resolved. The original text's "may be
+    Mixed" / "normally yields Mixed" language is descriptive, not a
+    binding deterministic rule.
+  canonical_rule_object_id: null   # deliberately unassigned per CHDM v0.1 §19 — assigning a
+                                     # final ID before the rule's semantics are approved would
+                                     # falsely imply methodological completeness.
+  safe_to_implement_now:
+    - contradiction object / detection / retention
+    - source provenance
+    - no-AI-arbitration safeguard
+    - D1 Disputed -> Mixed rule (see d1_contradiction_rule above)
+    - DMEG evaluation where contradiction materiality can otherwise be determined
+    - requirement-class promotion where contradiction is an approved trigger
+  not_safe_to_finalize:
+    - general deterministic contradiction -> Dimension State rule for D2-D8B
+  blocks_build_milestone_1: false
+  rationale_non_blocking: >
+    None of the six Milestone 1 Scenario Lab cases require the unresolved
+    general rule. S4 is fully covered by the already-binding D1 rule;
+    S1/S2/S3/S5/S6 involve no dimension-level contradiction (BAR-01 §2).
+  resolution_mechanism: "Approved methodology clarification or amendment only. Not resolvable by implementation, UX, AI prompting, or technical architecture."
+  engine_behavior_required: >
+    If the deterministic engine is ever invoked on a D2-D8B contradiction
+    case (none of S1-S6 trigger this), it must raise an explicit
+    UnresolvedMethodologyError identifying UC-01 rather than compute or
+    default a Dimension State.

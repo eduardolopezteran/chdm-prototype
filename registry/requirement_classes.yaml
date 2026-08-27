@@ -1,0 +1,51 @@
+# CHDM v0.1 — Dimension Applicability and Requirement Model
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §7
+methodology_version: "0.1"
+registry_object_type: RULE
+
+requirement_classes:
+  - code: UR
+    name: Universally Required
+    canonical_meaning: >
+      Evidence is necessary in every normal assessment, although its
+      expected form may vary by lifecycle.
+    current_dimensions: [D2, D6]
+
+  - code: LR
+    name: Lifecycle Required
+    canonical_meaning: >
+      Evidence becomes required because the lifecycle makes the construct
+      material to responsible diagnosis.
+    current_assignments:
+      - dimension: D1
+        lifecycle: [L1, L2, L3, L4]
+        note: "different evidence expectations per lifecycle stage — see dimensions.yaml"
+      - dimension: D3
+        lifecycle: [L1, L2]
+
+  - code: CR
+    name: Conditionally Required
+    canonical_meaning: >
+      A canonical event, signal, overlay, contradiction, potential risk or
+      dependency promotes a Supporting dimension into required status.
+    promoted_from: S
+
+  - code: S
+    name: Supporting
+    canonical_meaning: >
+      Evidence adds diagnostic value, but absence by itself does not
+      prevent a responsible conclusion.
+
+  - code: NA
+    name: Not Applicable
+    canonical_meaning: The construct genuinely does not apply under a canonical applicability rule.
+    prohibited_reasons:
+      # NA must never be used because evidence is merely:
+      - unavailable
+      - unknown
+      - stale
+      - uncollected
+
+# Requirement class must never be inferred from data absence — only from a
+# canonical rule (lifecycle matrix / trigger table) defined in
+# dimensions.yaml.

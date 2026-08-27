@@ -1,0 +1,59 @@
+# CHDM v0.1 — Reason-Code Model
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §13
+methodology_version: "0.1"
+registry_object_type: RULE
+
+principle: >
+  Every governed output requires explicit reason attribution. Operational,
+  epistemic and requirement reasons are kept in distinct families and are
+  never interchanged. A reason code does not replace the methodology
+  object responsible for the result — every consequential output must
+  reference governing object + governing rule + deterministic reason
+  (§13.4).
+
+# §13.1 — Requirement reason family (approved examples; explains WHY
+# evidence is required).
+requirement_reasons:
+  - REQ-UR-ADOPTION
+  - REQ-UR-RELATIONSHIP
+  - REQ-LR-VALUE-L1
+  - REQ-LR-VALUE-L4
+  - REQ-LR-ENGAGEMENT-L1
+  - REQ-CR-COMMERCIAL-DECISION
+  - REQ-CR-SERVICE-SIGNAL
+  - REQ-CR-STRATEGIC-SIGNAL
+  - REQ-CR-ORG-EVENT
+  - REQ-S-EXPERIENCE
+
+# §13.2 — Evidence Review reason family. Every ER1 result must contain at
+# least one of these (invariant INV-12 / functional-spec requirement).
+evidence_review_reasons:
+  - ER-DMEG-VALUE
+  - ER-DMEG-RISK-MATERIAL
+  - ER-DMEG-RISK-CRITICAL
+  - ER-DMEG-DIMENSION
+  - ER-DMEG-PRIORITY
+  - ER-DMEG-COMMERCIAL
+  - ER-DMEG-CONTRADICTION
+
+# §13.3 — Operational Priority reason family.
+operational_priority_reasons:
+  - OP1-CONFIRMED-CRITICAL
+  - OP2-CONFIRMED-MATERIAL
+  - OP2-CONFIRMED-DIMENSION-CONCERN
+  - OPU-PRIORITY-DEPENDENCY-UNRESOLVED
+  - OP3-NO-ESTABLISHED-MATERIAL-CONCERN
+
+# §13.4 — Codebook completeness note (verbatim acknowledgment from CHDM
+# v0.1 itself, not a downstream gap):
+codebook_completeness: >
+  "The exact exhaustive machine codebook was not separately frozen. The
+  approved code families and object-reference requirement are canonical;
+  new semantic reason categories require methodology governance."
+engine_constraint: >
+  The engine may only emit reason codes from the families above, or
+  mechanically-derived variants that are unambiguously within an approved
+  family and tied to a real governing object (e.g. a per-dimension
+  ER-DMEG-DIMENSION variant). It may never mint a new semantic reason
+  category (a genuinely new kind of justification) without methodology
+  governance approval — that would be inventing methodology, not encoding it.

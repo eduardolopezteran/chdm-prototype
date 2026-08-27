@@ -1,0 +1,75 @@
+# CHDM v0.1 Scenario Lab — S4
+# Static fixture (data only). Demonstrates the D1 contradiction rule
+# (§4.2, §12.2 — FULLY_GOVERNED, distinct from UC-01's unresolved general
+# D2-D8B contradiction rule): Current + Confirmed direct evidence exists
+# on BOTH sides of the objective, producing Disputed deterministically.
+#
+# Correction (Checkpoint 3 executive review): Disputed/D1=Mixed is the
+# CURRENT deterministic classification the §12.2 rule fixes — it is not,
+# by itself, proof that nothing remains decision-material. §12.1's general
+# contradiction rule states a contradiction "may create... DMEG... where
+# its resolution could materially alter a governed conclusion," and
+# DMEG-2 explicitly names "objective_outcome_or_D1" as a linked
+# conclusion. Genuine differential re-computation (engine/evaluate.py
+# step 4c) shows resolving this specific contradiction DOES change the
+# governed conclusion (Achieved/Supported vs. Not Achieved/Concerning,
+# and OP3 vs. OP2) — so it IS decision-material under DMEG-1/2/3, and a
+# DMEG is correctly raised. This is why the DMEG-1/2/3 gates do not
+# reduce to "D1 contradiction -> automatically 0 DMEGs" OR "D1
+# contradiction -> automatically 1 DMEG": each case is still judged by
+# the differential test, which happens to yield "yes" here because
+# neither side's evidence would leave D1 unaffected. Overall Reliability
+# = Low correctly follows from the now-real open DMEG (§9), not from the
+# Disputed classification itself (registry/reliability_rules.yaml
+# dimension_vs_overall / REL-01 still holds: a dimension-level Low does
+# NOT by itself make overall Low — it is the DMEG that makes it Low here).
+
+scenario_id: S4
+title: "Directly conflicting confirmed objective evidence -> Disputed, and decision-material"
+account_description: >
+  Fictional account at L3. Two independent, current, confirmed, directly
+  measured pieces of evidence conflict: one confirms the stated objective
+  was achieved, the other confirms it was not. Both are direct evidence
+  bases (Measured Operational Evidence), both Current + Confirmed, and
+  neither is stale, unverified, or missing. Which source is actually
+  correct remains an open question whose resolution would materially
+  change both the governed D1 conclusion and Operational Priority.
+
+lifecycle: L3
+not_yet_expected: false
+
+objective:
+  objective_id: OBJ-1
+  text: "Achieve 99.5% invoice-matching accuracy"
+  is_known: true
+
+dimensions_to_evaluate: [D1]
+
+evidence:
+  - evidence_id: E-VAL-A
+    evidence_state: CURRENT_CONFIRMED
+  - evidence_id: E-VAL-B
+    evidence_state: CURRENT_CONFIRMED
+
+value_evidence_signals:
+  - signal_id: E-VAL-A
+    evidence_id: E-VAL-A
+    basis: MEASURED_OPERATIONAL_EVIDENCE
+    supports: ACHIEVED
+  - signal_id: E-VAL-B
+    evidence_id: E-VAL-B
+    basis: MEASURED_OPERATIONAL_EVIDENCE
+    supports: NOT_ACHIEVED
+
+expected:
+  objective_outcome_state: DISPUTED
+  dimension_states:
+    D1: MIXED
+  dimension_reliability:
+    D1: LOW
+  risk_records: {}
+  dmeg_count: 1
+  dmeg_affects_operational_priority: true
+  reliability_level: LOW
+  operational_priority: OPU
+  evidence_review: ER1

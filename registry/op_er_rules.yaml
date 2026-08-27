@@ -1,0 +1,104 @@
+# CHDM v0.1 — Operational Priority and Evidence Review
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §10, §11
+methodology_version: "0.1"
+registry_object_type: RULE
+
+# ============================== Operational Priority ==============================
+# Supersedes the retired P1/P2/P3/P4 Review Priority architecture (§10,
+# INV-19). OP1 > OP2 > OP3 is the ONLY ordinal relationship. OPU is
+# explicitly outside the ordinal sequence (§10).
+operational_priority:
+  states: [OP1, OP2, OP3, OPU]
+  ordinal_sequence: [OP1, OP2, OP3]   # OPU deliberately excluded from ordering
+  opu_is_ordinal: false
+
+  deterministic_rules:
+    OP1:
+      name: Urgent Review
+      condition: At least one Current + Confirmed CRITICAL risk is active.
+      suppression: >
+        No favorable dimension, evidence completeness or other positive
+        indicator may suppress OP1.
+      reason_code: OP1-CONFIRMED-CRITICAL
+    OP2:
+      name: Review Required
+      precondition: OP1 absent
+      condition: >
+        At least one confirmed governed review condition exists:
+        (a) activated MATERIAL risk; OR
+        (b) a CONCERNING dimension produced from Current + Confirmed
+            evidence under a governed rule that requires review.
+      mixed_dimension_rule: >
+        A Mixed dimension may contribute to OP2 ONLY when it contains a
+        Current + Confirmed concern satisfying a governed Material
+        risk/indicator rule. Ordinary Mixed does NOT itself generate OP2
+        (INV-16).
+      reason_codes: [OP2-CONFIRMED-MATERIAL, OP2-CONFIRMED-DIMENSION-CONCERN]
+    OP3:
+      name: Routine Monitoring
+      condition: >
+        No confirmed OP1 condition exists AND no confirmed OP2 condition
+        exists AND no unresolved DMEG could materially elevate priority.
+      reason_code: OP3-NO-ESTABLISHED-MATERIAL-CONCERN
+    OPU:
+      name: Undetermined
+      condition: >
+        No confirmed OP1/OP2 condition exists AND unresolved evidence
+        could plausibly activate OP1 or OP2.
+      note: >
+        Potential Critical or Material severity based only on unresolved
+        evidence does NOT become a lower operational priority (i.e. does
+        not degrade to OP3). It produces OPU where priority remains
+        genuinely undetermined.
+      reason_code: OPU-PRIORITY-DEPENDENCY-UNRESOLVED
+
+  # An already-established confirmed OP1/OP2 is never replaced by OPU;
+  # ER1 coexists with it instead (INV-18, §8 DMEG consequences).
+  opu_never_overrides_established_op1_or_op2: true
+
+# ================================ Evidence Review =================================
+# Answers a different question than OP: does unresolved evidence still
+# require determination? (§11)
+evidence_review:
+  states: [ER1, ER0]
+  deterministic_rules:
+    ER1:
+      name: Evidence Review Required
+      condition: At least one DMEG exists.
+    ER0:
+      name: Evidence Review Not Required
+      condition: No DMEG exists.
+  er1_not_triggered_merely_because:
+    - a field is blank
+    - a Supporting dimension is Insufficient Evidence
+    - multiple low-consequence items are unavailable
+    - additional information would be desirable
+
+# OP and ER are independent axes — never rendered on one scale (§11).
+op_er_independence:
+  valid_combinations:
+    - [OP1, ER0]
+    - [OP1, ER1]
+    - [OP2, ER0]
+    - [OP2, ER1]
+    - [OP3, ER0]
+    - [OPU, ER1]
+  invalid_combinations:
+    - combo: [OPU, ER0]
+      invariant: INV-14
+      rationale: >
+        If priority is undetermined because unresolved evidence could
+        elevate it, that evidence satisfies DMEG by definition, which
+        forces ER1.
+
+# §17.5 — Operational Priority / Evidence Review validation table
+# (verbatim, CHDM v0.1's own governed test cases).
+validation_cases:
+  PRI-01: {scenario: "Confirmed Critical", OP: OP1, ER: "ER0 unless separate DMEG"}
+  PRI-02: {scenario: "Confirmed Material", OP: OP2, ER: "ER0 unless separate DMEG"}
+  PRI-03: {scenario: "Potential Critical, unverified", OP: OPU, ER: ER1}
+  PRI-04: {scenario: "Potential Material, unverified", OP: OPU, ER: ER1}
+  PRI-05: {scenario: "Confirmed Material + potential Critical", OP: OP2, ER: ER1}
+  PRI-06: {scenario: "Confirmed Critical + unrelated DMEG", OP: OP1, ER: ER1}
+  PRI-07: {scenario: "Routine account + non-material low-evidence Supporting dimension", OP: OP3, ER: ER0}
+  PRI-08: {scenario: "Fully supported routine account", OP: OP3, ER: ER0}

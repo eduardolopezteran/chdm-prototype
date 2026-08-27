@@ -1,0 +1,58 @@
+# CHDM v0.1 — Reproducible Assessment Sequence
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §16
+methodology_version: "0.1"
+registry_object_type: RULE
+
+canonical_sequence:
+  - step: 1
+    action: Define customer × product/use case
+  - step: 2
+    action: Assign L1-L4 lifecycle and applicable overlays
+  - step: 3
+    action: Establish the primary customer objective, or explicit Unknown
+  - step: 4
+    action: Register structured and qualitative Evidence Objects with provenance
+  - step: 5
+    action: AI may extract candidate qualitative observations
+    milestone_1_scope: excluded  # Milestone 1 evidence/confirmation is hand-authored directly
+  - step: 6
+    action: Human confirms/corrects consequential AI-extracted evidence where required
+    milestone_1_scope: excluded
+  - step: 7
+    action: Apply evidence quality, freshness, verification, contradiction and signal-direction ontology
+  - step: 8
+    action: Determine Objective Outcome State and Value Evidence Basis
+  - step: 9
+    action: Determine each dimension's applicability and Requirement Class
+  - step: 10
+    action: Evaluate D1-D7, D8A and D8B under governed dimension rules
+  - step: 11
+    action: Evaluate CR-01 through CR-08 for potential and activated severity
+  - step: 12
+    action: Determine dimension-level Reliability
+  - step: 13
+    action: Evaluate DMEG-1, DMEG-2 and DMEG-3
+  - step: 14
+    action: Determine overall Assessment Reliability
+  - step: 15
+    action: Determine Evidence Review — ER1 / ER0
+  - step: 16
+    action: Determine Operational Priority — OP1 / OP2 / OP3 / OPU
+  - step: 17
+    action: Preserve contradictions, missingness, reason codes and rule lineage
+  - step: 18
+    action: AI may generate a grounded explanation and diagnostic questions from the governed result
+    milestone_1_scope: excluded
+  - step: 19
+    action: Human retains decision accountability
+
+amendment_dependency_note: >
+  The amendment specifically changes the former sequence so the governing
+  account-level dependency is:
+  Reliability inputs -> DMEG determination -> Evidence Review -> Operational Priority
+  rather than a single P1/P2/P3/P4 scale.
+
+reproducibility_standard: >
+  Except for the explicitly excluded unresolved general contradiction rule
+  (UC-01), identical confirmed inputs under the same CHDM version must
+  produce identical governed outputs.

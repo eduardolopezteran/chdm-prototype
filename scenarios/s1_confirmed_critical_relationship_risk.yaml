@@ -1,0 +1,76 @@
+# CHDM v0.1 Scenario Lab — S1
+# Static fixture (data only — no executable logic). engine.evaluate()
+# computes every value under `expected:`; this file only declares inputs
+# and the methodology-derived outputs a reviewer expects.
+#
+# Confirmation state is authoritative once per evidence item, in the
+# `evidence:` block below (Checkpoint 3 correction) — the
+# dimension_qualifier_signals / risk_severity_claims entries reference an
+# evidence_id but never declare their own evidence_state.
+
+scenario_id: S1
+title: "Confirmed critical relationship risk amid otherwise favorable evidence"
+account_description: >
+  Northwind Robotics (fictional, L3 — Adoption/Institutionalization). The
+  account's stated objective (reduce monthly reconciliation effort by 50%)
+  is confirmed achieved via measured operational evidence, and product
+  adoption is confirmed healthy (intended workflows operating normally).
+  However, the account's champion has confirmed departed with no
+  successor identified — a Current + Confirmed CR-01 (Sponsor/Champion
+  Continuity) Critical condition. This scenario demonstrates CHDM's
+  non-compensation doctrine (§1.3): favorable Objective/D2 evidence must
+  not suppress a confirmed Critical relationship risk.
+
+lifecycle: L3
+not_yet_expected: false
+
+objective:
+  objective_id: OBJ-1
+  text: "Reduce monthly reconciliation effort by 50%"
+  is_known: true
+
+dimensions_to_evaluate: [D1, D2, D6]
+
+evidence:
+  - evidence_id: E-VAL-1
+    evidence_state: CURRENT_CONFIRMED
+  - evidence_id: E-ADOPT-1
+    evidence_state: CURRENT_CONFIRMED
+  - evidence_id: E-CHAMPION-1
+    evidence_state: CURRENT_CONFIRMED
+
+value_evidence_signals:
+  - signal_id: E-VAL-1
+    evidence_id: E-VAL-1
+    basis: MEASURED_OPERATIONAL_EVIDENCE
+    supports: ACHIEVED
+
+dimension_qualifier_signals:
+  - signal_id: E-D2-1
+    dimension: D2
+    evidence_id: E-ADOPT-1
+    qualifier: INTENDED_WORKFLOWS_OPERATING_NORMALLY
+  - signal_id: E-D6-1
+    dimension: D6
+    evidence_id: E-CHAMPION-1
+    qualifier: CHAMPION_LOST_NO_SUCCESSOR
+
+risk_severity_claims:
+  - signal_id: E-RISK-1
+    mechanism: CR-01
+    evidence_id: E-CHAMPION-1
+    tier: CRITICAL
+
+expected:
+  objective_outcome_state: ACHIEVED
+  dimension_states:
+    D1: SUPPORTED
+    D2: SUPPORTED
+    D6: CONCERNING
+  dimension_reliability: {}
+  risk_records:
+    CR-01: {potential_severity: CRITICAL, activated_severity: CRITICAL}
+  dmeg_count: 0
+  reliability_level: HIGH
+  operational_priority: OP1
+  evidence_review: ER0

@@ -1,0 +1,458 @@
+{
+  "milestone": "4B",
+  "run_label": "_diag_subprocess_check",
+  "generated_at_utc": "2026-08-23T19:24:07.473003+00:00",
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "prompt_version": "v4",
+  "dimension_qualifier_prompt_version": "v3.1",
+  "evaluation_set_path": "eval/labeled_set.yaml",
+  "evaluation_set_case_count": 3,
+  "targeted_run_case_id_prefixes": [
+    "07",
+    "23",
+    "35"
+  ],
+  "aggregate_metrics": {
+    "total_cases": 3,
+    "schema_performance": {
+      "total_model_calls": 3,
+      "valid_first_attempt_cases": 0,
+      "cases_requiring_retry": 0,
+      "cases_still_invalid_after_retry": 3,
+      "schema_valid_rate": 0.0
+    },
+    "classification_totals": {
+      "MATCHED_EXPECTED": 0,
+      "VALID_UNLABELED": 0,
+      "WRONG_TYPE": 0,
+      "UNSUPPORTED": 0,
+      "DUPLICATE": 0,
+      "IRRELEVANT_BUT_GROUNDED": 0
+    },
+    "total_accepted_span_grounded_observations": 0,
+    "needs_relevance_review_count": 0,
+    "ontology_ambiguity_triggered_count": 0,
+    "precision": {
+      "supported_extraction_precision": null,
+      "label_match_precision": null,
+      "relevant_extraction_precision": null,
+      "note": "Three separate numbers by design (Milestone 2B.1 spec \u00a76) \u2014 not collapsed into one. supported = grounded regardless of label match; label_match = matches a required benchmark expectation exactly (the old-style precision number); relevant = grounded AND either a required or optional-valid Customer-Health-relevant match. Approximate, engineering-grade measures, not a validated model-performance claim."
+    },
+    "recall": {
+      "primary_recall": 0.0,
+      "primary_total": 4,
+      "required_recall": 0.0,
+      "required_total": 4,
+      "optional_valid_capture_rate": 0.0,
+      "optional_valid_total": 2
+    },
+    "source_grounding": {
+      "accepted_with_valid_span": 0,
+      "span_validation_failures": 0,
+      "unknown_evidence_reference_rejections": 0
+    },
+    "explicit_vs_inferred": {
+      "correctly_labeled": 0,
+      "incorrectly_labeled": 0
+    },
+    "governance_boundary": {
+      "prohibited_content_attempted_by_model": 0,
+      "prohibited_content_accepted_by_pipeline": 0,
+      "target_for_accepted": 0
+    },
+    "contradictions": {
+      "cases_with_expected_contradiction": 0,
+      "detected": 0,
+      "status_all_candidate": 0,
+      "both_sides_resolved": 0
+    },
+    "candidate_risk_signals": {
+      "matched_expected": 0,
+      "unexpected_candidates": 0,
+      "reference_correct": 0,
+      "reference_checked": 0,
+      "reference_accuracy_rate": null,
+      "expected_total": 0,
+      "expected_matched": 0,
+      "missed_candidate_count": 0,
+      "recall": null,
+      "false_candidate_rate": null,
+      "mechanism_accuracy_rate": null,
+      "tier_accuracy_rate": null
+    },
+    "candidate_evidence_classifications": {
+      "matched_expected": 0,
+      "unexpected_candidates": 0,
+      "reference_correct": 0,
+      "reference_checked": 0,
+      "reference_accuracy_rate": null,
+      "expected_total": 0,
+      "expected_matched": 0,
+      "missed_candidate_count": 0,
+      "recall": null,
+      "false_candidate_rate": null,
+      "basis_accuracy_rate": null,
+      "supports_accuracy_rate": null
+    },
+    "candidate_d2_qualifiers": {
+      "matched_expected": 0,
+      "unexpected_candidates": 0,
+      "reference_correct": 0,
+      "reference_checked": 0,
+      "reference_accuracy_rate": null,
+      "expected_total": 1,
+      "expected_matched": 0,
+      "missed_candidate_count": 1,
+      "recall": 0.0,
+      "false_candidate_rate": null,
+      "qualifier_accuracy_rate": null
+    },
+    "candidate_d6_qualifiers": {
+      "matched_expected": 0,
+      "unexpected_candidates": 0,
+      "reference_correct": 0,
+      "reference_checked": 0,
+      "reference_accuracy_rate": null,
+      "expected_total": 0,
+      "expected_matched": 0,
+      "missed_candidate_count": 0,
+      "recall": null,
+      "false_candidate_rate": null,
+      "qualifier_accuracy_rate": null
+    },
+    "dimension_qualifier_stage_failures": 0,
+    "dimension_qualifier_failed_observation_count": 0
+  },
+  "case_results": [
+    {
+      "case_id": "07_healthy_automated_workflow_low_human_activity",
+      "request_failure": "Model service failure: Anthropic extraction call failed: \"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted\"",
+      "dimension_qualifier_stage_failure": null,
+      "dimension_qualifier_failures_detail": [],
+      "dimension_qualifier_atomic_predicate_detail": [],
+      "schema": {
+        "calls_made": 1,
+        "call_log": [
+          {
+            "latency_ms": 18.561253999905603,
+            "usage": null,
+            "success": false,
+            "error": "\"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted\""
+          }
+        ]
+      },
+      "dimension_qualifier_schema": {
+        "calls_made": 0,
+        "call_log": []
+      },
+      "counts": {
+        "accepted": 0,
+        "rejected": 0,
+        "candidate_contradictions": 0,
+        "candidate_risk_signals": 0,
+        "candidate_evidence_classifications": 0,
+        "candidate_d2_qualifiers": 0,
+        "candidate_d6_qualifiers": 0,
+        "dedup_collapsed": 0
+      },
+      "classification": {
+        "classified": [],
+        "slots": [
+          {
+            "index": 0,
+            "canonical_type": "ADOPTION_OBSERVATION",
+            "alternate_types": [],
+            "role": "primary",
+            "basis": "EXPLICIT",
+            "span_substrings": [
+              "the integration handles the nightly sync automatically and has run without failure for the last 90 days",
+              "the integration handles the nightly sync automatically"
+            ],
+            "source": null,
+            "ontology_ambiguity": false,
+            "claimed": false
+          },
+          {
+            "index": 1,
+            "canonical_type": "ADOPTION_OBSERVATION",
+            "alternate_types": [],
+            "role": "optional-valid",
+            "basis": "EXPLICIT",
+            "span_substrings": [
+              "Direct login activity is low this quarter"
+            ],
+            "source": null,
+            "ontology_ambiguity": false,
+            "claimed": false
+          },
+          {
+            "index": 2,
+            "canonical_type": "SERVICE_OBSERVATION",
+            "alternate_types": [],
+            "role": "optional-valid",
+            "basis": "EXPLICIT",
+            "span_substrings": [
+              "has run without failure for the last 90 days"
+            ],
+            "source": null,
+            "ontology_ambiguity": false,
+            "claimed": false
+          }
+        ]
+      },
+      "missing_information": {
+        "expected": [],
+        "found": [],
+        "matched_count": 0,
+        "missed": []
+      },
+      "candidate_classification": {
+        "risk_signals": {
+          "classified": [],
+          "slots": []
+        },
+        "evidence_classifications": {
+          "classified": [],
+          "slots": []
+        }
+      },
+      "dimension_qualifier_classification": {
+        "d2_qualifiers": {
+          "classified": [],
+          "slots": []
+        },
+        "d6_qualifiers": {
+          "classified": [],
+          "slots": []
+        }
+      },
+      "source_grounding": {
+        "accepted_with_valid_span": 0,
+        "span_rejections": 0,
+        "unknown_evidence_rejections": 0
+      },
+      "boundary": {
+        "attempted": 0,
+        "accepted": 0
+      },
+      "rejected_detail": [],
+      "accepted_detail": [],
+      "candidate_contradictions_detail": [],
+      "candidate_risk_signals_detail": [],
+      "candidate_evidence_classifications_detail": [],
+      "candidate_d2_qualifiers_detail": [],
+      "candidate_d6_qualifiers_detail": [],
+      "dedup_audit_detail": []
+    },
+    {
+      "case_id": "23_pure_adoption_milestone_no_goal_language",
+      "request_failure": "Model service failure: Anthropic extraction call failed: \"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted\"",
+      "dimension_qualifier_stage_failure": null,
+      "dimension_qualifier_failures_detail": [],
+      "dimension_qualifier_atomic_predicate_detail": [],
+      "schema": {
+        "calls_made": 1,
+        "call_log": [
+          {
+            "latency_ms": 1.287598000089929,
+            "usage": null,
+            "success": false,
+            "error": "\"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted\""
+          }
+        ]
+      },
+      "dimension_qualifier_schema": {
+        "calls_made": 0,
+        "call_log": []
+      },
+      "counts": {
+        "accepted": 0,
+        "rejected": 0,
+        "candidate_contradictions": 0,
+        "candidate_risk_signals": 0,
+        "candidate_evidence_classifications": 0,
+        "candidate_d2_qualifiers": 0,
+        "candidate_d6_qualifiers": 0,
+        "dedup_collapsed": 0
+      },
+      "classification": {
+        "classified": [],
+        "slots": [
+          {
+            "index": 0,
+            "canonical_type": "ADOPTION_OBSERVATION",
+            "alternate_types": [],
+            "role": "primary",
+            "basis": "EXPLICIT",
+            "span_substrings": [
+              "finished configuring all twelve automated workflows this week"
+            ],
+            "source": null,
+            "ontology_ambiguity": false,
+            "claimed": false
+          },
+          {
+            "index": 1,
+            "canonical_type": "ADOPTION_OBSERVATION",
+            "alternate_types": [],
+            "role": "primary",
+            "basis": "EXPLICIT",
+            "span_substrings": [
+              "runs the platform's nightly batch job every night without any manual intervention"
+            ],
+            "source": null,
+            "ontology_ambiguity": false,
+            "claimed": false
+          }
+        ]
+      },
+      "missing_information": {
+        "expected": [],
+        "found": [],
+        "matched_count": 0,
+        "missed": []
+      },
+      "candidate_classification": {
+        "risk_signals": {
+          "classified": [],
+          "slots": []
+        },
+        "evidence_classifications": {
+          "classified": [],
+          "slots": []
+        }
+      },
+      "dimension_qualifier_classification": {
+        "d2_qualifiers": {
+          "classified": [],
+          "slots": []
+        },
+        "d6_qualifiers": {
+          "classified": [],
+          "slots": []
+        }
+      },
+      "source_grounding": {
+        "accepted_with_valid_span": 0,
+        "span_rejections": 0,
+        "unknown_evidence_rejections": 0
+      },
+      "boundary": {
+        "attempted": 0,
+        "accepted": 0
+      },
+      "rejected_detail": [],
+      "accepted_detail": [],
+      "candidate_contradictions_detail": [],
+      "candidate_risk_signals_detail": [],
+      "candidate_evidence_classifications_detail": [],
+      "candidate_d2_qualifiers_detail": [],
+      "candidate_d6_qualifiers_detail": [],
+      "dedup_audit_detail": []
+    },
+    {
+      "case_id": "35_d2_qualifier_automation_reliable_low_login_ok",
+      "request_failure": "Model service failure: Anthropic extraction call failed: \"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted\"",
+      "dimension_qualifier_stage_failure": null,
+      "dimension_qualifier_failures_detail": [],
+      "dimension_qualifier_atomic_predicate_detail": [],
+      "schema": {
+        "calls_made": 1,
+        "call_log": [
+          {
+            "latency_ms": 0.8601879999332596,
+            "usage": null,
+            "success": false,
+            "error": "\"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted\""
+          }
+        ]
+      },
+      "dimension_qualifier_schema": {
+        "calls_made": 0,
+        "call_log": []
+      },
+      "counts": {
+        "accepted": 0,
+        "rejected": 0,
+        "candidate_contradictions": 0,
+        "candidate_risk_signals": 0,
+        "candidate_evidence_classifications": 0,
+        "candidate_d2_qualifiers": 0,
+        "candidate_d6_qualifiers": 0,
+        "dedup_collapsed": 0
+      },
+      "classification": {
+        "classified": [],
+        "slots": [
+          {
+            "index": 0,
+            "canonical_type": "ADOPTION_OBSERVATION",
+            "alternate_types": [],
+            "role": "primary",
+            "basis": "EXPLICIT",
+            "span_substrings": [
+              "The nightly data sync between the customer's ERP and our platform has run automatically without failure for the past six months"
+            ],
+            "source": null,
+            "ontology_ambiguity": false,
+            "claimed": false
+          }
+        ]
+      },
+      "missing_information": {
+        "expected": [],
+        "found": [],
+        "matched_count": 0,
+        "missed": []
+      },
+      "candidate_classification": {
+        "risk_signals": {
+          "classified": [],
+          "slots": []
+        },
+        "evidence_classifications": {
+          "classified": [],
+          "slots": []
+        }
+      },
+      "dimension_qualifier_classification": {
+        "d2_qualifiers": {
+          "classified": [],
+          "slots": [
+            {
+              "index": 0,
+              "qualifier": "AUTOMATION_RELIABLE_LOW_LOGIN_OK",
+              "role": "primary",
+              "supporting_observation_span_substrings": [
+                "The nightly data sync between the customer's ERP and our platform has run automatically without failure for the past six months"
+              ],
+              "claimed": false
+            }
+          ]
+        },
+        "d6_qualifiers": {
+          "classified": [],
+          "slots": []
+        }
+      },
+      "source_grounding": {
+        "accepted_with_valid_span": 0,
+        "span_rejections": 0,
+        "unknown_evidence_rejections": 0
+      },
+      "boundary": {
+        "attempted": 0,
+        "accepted": 0
+      },
+      "rejected_detail": [],
+      "accepted_detail": [],
+      "candidate_contradictions_detail": [],
+      "candidate_risk_signals_detail": [],
+      "candidate_evidence_classifications_detail": [],
+      "candidate_d2_qualifiers_detail": [],
+      "candidate_d6_qualifiers_detail": [],
+      "dedup_audit_detail": []
+    }
+  ]
+}

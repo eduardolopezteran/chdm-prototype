@@ -1,0 +1,65 @@
+# CHDM v0.1 — Methodology-Level Validation Cases
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §17
+# Note: V-OBJ-01..04 live in objective_outcome.yaml (S4/S3-relevant);
+# REQ-01..08 live in dmeg_rules.yaml; PRI-01..08 live in op_er_rules.yaml;
+# REL-01 lives in reliability_rules.yaml. This file holds the remaining
+# validation obligations not already embedded elsewhere.
+methodology_version: "0.1"
+registry_object_type: VAL
+
+# §17.1 — Original validation obligations (methodology-level, not
+# Milestone-1 test-by-test — recorded for completeness/traceability).
+validation_obligations:
+  - inter_rater_consistency
+  - scenario_discrimination
+  - rule_determinism
+  - ai_extraction_accuracy
+  - contradiction_detection
+  - grounding_fidelity
+  - human_correction_effectiveness
+
+scenario_discrimination_counterexamples:
+  - strong NPS + critical sponsor loss                # -> S1/S2 pair
+  - strong usage + no value                             # -> S3
+  - low login + healthy automation                       # -> S5
+  - strong value + procurement risk
+  - insufficient evidence without obvious negative signals
+note: >
+  These validate diagnostic reliability and AI task performance, not churn
+  prediction (§17.1).
+
+# §17.3 — Risk severity validation. For EACH CR-01 through CR-08, the
+# methodology requires testing all five conditions below. Full per-
+# mechanism Watch/Material/Critical conditions are registered in
+# risk_mechanisms.yaml; this section records the general test shape and
+# the specific unverified-potential-Critical governed consequence.
+risk_severity_validation_shape:
+  per_mechanism_tests:
+    - watch_condition
+    - material_condition
+    - critical_condition
+    - unverified_potential_critical_condition
+    - resolution_condition
+  unverified_potential_critical_expected:
+    potential_severity: CRITICAL
+    activated_severity: null
+    op1: absent
+    consequences_governed_by: [DMEG, ER, OPU]   # per the final amendment — this is exactly S2
+
+# §17.7 — Contradiction validation boundary.
+contradiction_validation_boundary:
+  d1_contradiction: >
+    Can be regression-tested against the frozen deterministic result
+    (§12.2) — this is Scenario S4.
+  d2_d8b_contradiction:
+    may_test:
+      - contradiction_detection
+      - preservation
+      - provenance
+      - no_ai_arbitration
+      - dmeg_behavior_where_determinable
+    must_not_test: >
+      A deterministic expected Dimension State for the general
+      contradiction case must NOT be included until UC-01 receives
+      approved disposition. BAR-01 confirms this exclusion does not block
+      the first milestone.

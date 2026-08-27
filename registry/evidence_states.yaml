@@ -1,0 +1,89 @@
+# CHDM v0.1 — Evidence Ontology
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §3
+methodology_version: "0.1"
+registry_object_type: EVID
+
+# §3.2 — governed evidence-quality vocabulary (evidence STATE axis).
+# Orthogonal to signal DIRECTION — never merged into one enum (§3.2).
+evidence_states:
+  - code: CURRENT_CONFIRMED
+    id: CHDM-EVID-CURRENTCONFIRMED-001
+    name: Current + Confirmed
+  - code: CURRENT_UNVERIFIED
+    id: CHDM-EVID-CURRENTUNVERIFIED-001
+    name: Current + Unverified
+  - code: STALE
+    id: CHDM-EVID-STALE-001
+    name: Stale
+  - code: CONTRADICTORY
+    id: CHDM-EVID-CONTRADICTORY-001
+    name: Contradictory
+  - code: UNAVAILABLE
+    id: CHDM-EVID-UNAVAILABLE-001
+    name: Unavailable
+  - code: NOT_APPLICABLE
+    id: CHDM-EVID-NOTAPPLICABLE-001
+    name: Not Applicable
+
+# §3.2 — signal direction axis (independent of evidence state).
+signal_directions:
+  - code: FAVORABLE
+    name: Favorable
+  - code: CONCERNING
+    name: Concerning
+  - code: MIXED
+    name: Mixed
+  - code: NON_DIRECTIONAL
+    name: Non-directional
+
+# §3.3 — Confirmation boundary. Only Current + Confirmed evidence may:
+confirmation_boundary:
+  only_current_confirmed_may:
+    - substantiate a deterministic favorable state requiring confirmation
+    - activate Material or Critical risk severity
+    - establish Achieved (Objective Outcome)
+    - resolve a material contradiction
+    - produce a consequential deterministic escalation
+  ai_extracted_initial_state: CURRENT_UNVERIFIED
+  # §3.3 / Functional Spec FR-7.1: every AI-extracted observation is created
+  # Current + Unverified with Activated Severity = None, regardless of
+  # extraction confidence.
+  ai_may_activate_severity: false
+
+# §3.4 — Freshness / staleness.
+# CHDM v0.1 explicitly does NOT establish one universal numerical age
+# threshold. "Relevance depends on the construct and context." No engine
+# code path may hard-code a universal day-count staleness rule as if it
+# were CHDM v0.1 itself. (OFD-01 O-1's tiered day-count model is a
+# downstream, deployment-configurable functional-spec addition — NOT part
+# of frozen CHDM v0.1 — and is recorded here only as an implementation
+# parameter, never presented as a CHDM-level rule.)
+staleness:
+  chdm_universal_threshold_defined: false
+  governed_via: [requirement_class, dmeg, reliability]
+  implementation_parameter_source: "OFD-01 O-1 (functional-spec layer, not CHDM v0.1)"
+
+# §3.1 — Evidence Object canonical fields.
+evidence_object_fields:
+  - evidence_id
+  - dimension
+  - indicator_observation
+  - source
+  - provenance          # user-provided | AI-extracted | human-confirmed | deterministic
+  - observed_date_period
+  - applicability        # Applicable | Not Applicable
+  - freshness             # Current | Stale | Unknown
+  - verification           # Confirmed | Unverified
+  - consistency              # Consistent | Contradictory
+  - signal_direction
+  - source_excerpt_reference
+
+# §3.5 — mandatory traceability chain for material outputs.
+traceability_chain:
+  chain:
+    - source_evidence
+    - status_confirmation
+    - methodology_object_rule
+    - deterministic_conclusion
+    - interpretation
+  note: "AI explanation cannot replace this lineage."

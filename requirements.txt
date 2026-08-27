@@ -1,0 +1,30 @@
+# CHDM Engine — dependencies to run Milestone 1 through Milestone 3B locally.
+#
+# Milestone 1 deterministic core needs only PyYAML + jsonschema (no LLM
+# dependency anywhere in that execution path).
+# Milestone 2 (extraction) additionally needs the anthropic SDK for live
+# model calls (eval/run_eval.py, extraction/provider.py's
+# AnthropicExtractionProvider, tests/test_extraction_live_model.py).
+# Milestone 3A (confirmation/) needs nothing beyond the above -- pure
+# Python + the existing domain/engine/extraction packages.
+# Milestone 3B (ui/) additionally needs streamlit, for the approved
+# Streamlit-prototype confirmation UI (run: streamlit run run_ui.py).
+# Milestone 3C (ui/sample_scenarios.py) reuses the already-required
+# PyYAML to load curated demo evidence text directly from
+# eval/labeled_set.yaml at runtime -- no new dependency introduced.
+# Milestone 3D (confirmation/recompute.py's objective-identity bridge)
+# needs nothing beyond the above -- pure Python, same packages.
+# Milestone 3E (confirmation/contradiction_review.py, ui/contradiction_view.py)
+# needs nothing beyond the above either -- pure Python + the existing
+# Streamlit dependency, same packages.
+# Milestone 4A (ui/labels.py, the @st.fragment scroll-position fix in
+# ui/item_card.py and ui/contradiction_view.py) needs nothing new either --
+# st.fragment has been a stable (non-experimental) Streamlit API since well
+# before the streamlit>=1.60 already required here.
+# Everything else in the deterministic test suite uses only the standard
+# library plus these packages.
+
+PyYAML>=6.0
+jsonschema>=4.0
+anthropic>=0.60
+streamlit>=1.60

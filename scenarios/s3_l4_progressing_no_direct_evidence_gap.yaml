@@ -1,0 +1,51 @@
+# CHDM v0.1 Scenario Lab — S3
+# Static fixture (data only). Demonstrates REQ-06 (§17.4): at L4, current
+# credible direct value evidence is required; its absence creates a D1
+# DMEG (linked to both the Objective/D1 conclusion and to Operational
+# Priority — CHDM's own stated consequence for this named case), even
+# though Proxy Supported evidence is enough on its own to establish
+# Progressing (V-OBJ-03).
+
+scenario_id: S3
+title: "Mature-lifecycle account, high proxy usage, no direct value evidence"
+account_description: >
+  Fictional account at L4 (Mature/Optimization). Usage telemetry (a proxy
+  signal, not a direct outcome measurement) shows meaningful continued
+  engagement, confirmed current. No direct evidence (measured operational
+  outcome, customer confirmation, or independent verification) of the
+  underlying objective's realization exists. Per V-OBJ-03, proxy-only
+  confirmed evidence is sufficient to support Progressing but never
+  Achieved. Per REQ-06, the absence of current direct value evidence at L4
+  is itself decision-material and raises a DMEG.
+
+lifecycle: L4
+not_yet_expected: false
+
+objective:
+  objective_id: OBJ-1
+  text: "Consolidate reporting workflows onto the platform"
+  is_known: true
+
+dimensions_to_evaluate: [D1]
+
+evidence:
+  - evidence_id: E-USAGE-1
+    evidence_state: CURRENT_CONFIRMED
+
+value_evidence_signals:
+  - signal_id: E-VAL-1
+    evidence_id: E-USAGE-1
+    basis: PROXY_SUPPORTED
+    supports: PROGRESSING
+
+expected:
+  objective_outcome_state: PROGRESSING
+  dimension_states:
+    D1: MIXED
+  dimension_reliability: {}
+  risk_records: {}
+  dmeg_count: 1
+  dmeg_affects_operational_priority: true
+  reliability_level: LOW
+  operational_priority: OPU
+  evidence_review: ER1

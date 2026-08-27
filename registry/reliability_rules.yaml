@@ -1,0 +1,55 @@
+# CHDM v0.1 — Assessment Reliability
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §9
+methodology_version: "0.1"
+registry_object_type: RULE
+
+definition: >
+  Assessment Reliability measures the adequacy of evidence supporting the
+  conclusions drawn. It is neither Customer Health nor AI confidence.
+
+states:
+  HIGH:
+    condition: >
+      All materially contributing evidence is current, confirmed and
+      adequate. Minor non-material evidence may remain absent.
+  MEDIUM:
+    condition: >
+      Material evidence is adequate but identifiable limitations exist
+      that do not create a DMEG and cannot materially alter the current
+      governed conclusion.
+  LOW:
+    condition: One or more unresolved DMEGs exist.
+
+non_compensatory: true
+dependency_based: true
+expressed_as_number_or_percentage: false
+
+# Dimension-level vs overall Reliability (§9).
+dimension_vs_overall:
+  rule: >
+    A Supporting dimension may have Low dimension-level reliability while
+    overall Assessment Reliability remains High or Medium IF that
+    dimension does not materially contribute to the account-level
+    conclusion. Several low-consequence missing dimensions therefore do
+    not automatically create Low overall Reliability.
+
+# Governing invariant (§9, INV-11 / REL-01).
+governing_invariant:
+  id: REL-01
+  rule: "Overall Reliability = Low with no DMEG is invalid."
+  invariant_ref: INV-11
+
+# §17.6 — REL-01 validation case (verbatim, CHDM v0.1's own governed test).
+validation_case:
+  id: REL-01
+  name: False Low
+  inputs:
+    - no confirmed Material/Critical concern
+    - material diagnostic drivers adequately supported
+    - optional/supporting experience evidence missing
+  must_fail_validation: "Overall Reliability = Low"
+  permitted_result:
+    dimension_level: "D4 dimension Reliability may be Low"
+    overall: "High or Medium"
+    er: ER0
+    op: "OP3 permissible"

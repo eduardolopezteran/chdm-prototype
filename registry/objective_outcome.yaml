@@ -1,0 +1,123 @@
+# CHDM v0.1 — Objective Outcome and Value Evidence Basis
+# Source: CHDM v0.1 Frozen Governing Methodology Baseline, §5
+methodology_version: "0.1"
+registry_object_type: OBJ
+
+# §5.1 — Objective Outcome State (multi-way governed enum; NOT ordinal).
+objective_outcome_states:
+  - code: UNKNOWN
+    id: CHDM-OBJ-OUTCOME-UNKNOWN-001
+    canonical_meaning: Insufficient evidence to determine progress or outcome.
+  - code: NOT_YET_EXPECTED
+    id: CHDM-OBJ-OUTCOME-NOTYETEXPECTED-001
+    canonical_meaning: >
+      Lifecycle legitimately precedes reasonable expectation of outcome
+      realization.
+  - code: PROGRESSING
+    id: CHDM-OBJ-OUTCOME-PROGRESSING-001
+    canonical_meaning: >
+      Confirmed evidence shows meaningful progress but achievement is not
+      established.
+  - code: ACHIEVED
+    id: CHDM-OBJ-OUTCOME-ACHIEVED-001
+    canonical_meaning: >
+      Current confirmed direct evidence supports that the intended outcome
+      occurred.
+  - code: NOT_ACHIEVED
+    id: CHDM-OBJ-OUTCOME-NOTACHIEVED-001
+    canonical_meaning: >
+      Current confirmed evidence indicates the expected outcome has not
+      occurred or is materially off track when it should have occurred.
+  - code: DISPUTED
+    id: CHDM-OBJ-OUTCOME-DISPUTED-001
+    canonical_meaning: >
+      Current material confirmed evidence supports conflicting conclusions
+      about achievement.
+
+# §5.2 — Value Evidence Basis. Multi-valued. No universal numerical or
+# ordinal hierarchy applies (multiple bases may coexist).
+value_evidence_bases:
+  - code: PROXY_SUPPORTED
+    id: CHDM-EVID-PROXYSUPPORTED-001
+  - code: MEASURED_OPERATIONAL_EVIDENCE
+    id: CHDM-EVID-MEASUREDOPERATIONAL-001
+  - code: CUSTOMER_CONFIRMED
+    id: CHDM-EVID-CUSTOMERCONFIRMED-001
+  - code: INDEPENDENTLY_VERIFIED
+    id: CHDM-EVID-INDEPENDENTLYVERIFIED-001
+  - code: UNVERIFIED_CLAIM
+    id: CHDM-EVID-UNVERIFIEDCLAIM-001
+  - code: INSUFFICIENT_EVIDENCE
+    id: CHDM-EVID-INSUFFICIENTBASIS-001
+
+# §5.3 — Direct vs indirect evidence rule for ACHIEVED specifically.
+achieved_evidence_rule:
+  achieved_may_be_supported_by_current_confirmed_relevant_uncontradicted:
+    - MEASURED_OPERATIONAL_EVIDENCE
+    - CUSTOMER_CONFIRMED   # only when directly relevant
+    - INDEPENDENTLY_VERIFIED
+  achieved_cannot_be_produced_by_alone:
+    - PROXY_SUPPORTED
+    - UNVERIFIED_CLAIM
+  progressing_may_be_supported_by:
+    - PROXY_SUPPORTED
+
+# §5.4 — Deterministic Objective Outcome rules (exact governing conditions).
+# The engine evaluates these in the order listed; first satisfied rule
+# governs (Disputed/contradiction detection precedes the others in
+# practice because it depends on coexisting confirmed evidence for two
+# opposite conclusions).
+deterministic_rules:
+  UNKNOWN:
+    condition: >
+      Neither progress nor outcome can be determined from adequate current
+      evidence.
+  NOT_YET_EXPECTED:
+    condition: >
+      Lifecycle indicates realization is not yet reasonably due AND no
+      confirmed evidence demonstrates material failure.
+  PROGRESSING:
+    condition: >
+      At least one current + confirmed evidence object demonstrates
+      meaningful progress AND achievement is not directly established AND
+      no current + confirmed evidence establishes material failure.
+    # V-OBJ-03 (§17.2, verbatim from CHDM v0.1): "Milestones complete and
+    # usage strong, but intended business outcome not demonstrated." ->
+    # Outcome = Progressing; Proxy Supported included; not Achieved. This
+    # is CHDM v0.1's own governed validation case, not a downstream
+    # interpretation — it directly resolves the Scenario S3 question.
+    validation_case: V-OBJ-03
+  ACHIEVED:
+    condition: >
+      Objective is sufficiently defined AND at least one current +
+      confirmed DIRECT outcome evidence object addresses it (Measured
+      Operational Evidence, directly relevant Customer Confirmed, or
+      Independently Verified) AND no current + confirmed material evidence
+      contradicts achievement.
+  NOT_ACHIEVED:
+    condition: >
+      Outcome should reasonably have occurred AND current + confirmed
+      evidence directly indicates it has not, or remains materially below
+      the intended result, AND no equally material current + confirmed
+      evidence supports achievement.
+  DISPUTED:
+    condition: >
+      Current + confirmed evidence supporting Achieved AND current +
+      confirmed evidence supporting Not Achieved coexist and cannot be
+      reconciled through established context.
+    downstream_effect:
+      dimension: D1
+      dimension_state: MIXED
+      dimension_reliability: LOW
+      note: >
+        Fully governed, deterministic (§12.2). Both evidence bases remain
+        visible. AI cannot resolve the conflict.
+
+# §5.5 — Contradiction resolution for Objective Outcome.
+disputed_removal:
+  only_by:
+    - correction
+    - invalidation
+    - human_confirmed_contextual_resolution
+  ai_may_resolve: false
+  source_strength_weighting_used: false

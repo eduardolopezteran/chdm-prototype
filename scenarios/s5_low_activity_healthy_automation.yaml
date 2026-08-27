@@ -1,0 +1,46 @@
+# CHDM v0.1 Scenario Lab — S5
+# Static fixture (data only). Demonstrates the D2 automation-reliability
+# safeguard (registry/dimensions.yaml D2 state_rules /
+# domain/signals.py DIMENSION_QUALIFIERS "AUTOMATION_RELIABLE_LOW_LOGIN_OK"):
+# low direct human login activity alone must not be read as Concerning
+# adoption when the account's workflows are automation-driven and that
+# automation is confirmed reliable — low visible login activity is
+# expected and healthy in that configuration, not a gap.
+
+scenario_id: S5
+title: "Low direct login activity with confirmed reliable automation -> D2 Supported"
+account_description: >
+  Fictional account whose primary workflows run through confirmed reliable
+  system-to-system automation rather than direct human login sessions.
+  Direct login activity is low, but this is expected given the automated
+  workflow design, and the automation's reliability is Current + Confirmed.
+  No objective is evaluated in this scenario — it isolates the D2
+  automation-reliability safeguard on its own.
+
+lifecycle: L4
+not_yet_expected: false
+
+objective: null
+
+dimensions_to_evaluate: [D2]
+
+evidence:
+  - evidence_id: E-AUTOMATION-1
+    evidence_state: CURRENT_CONFIRMED
+
+dimension_qualifier_signals:
+  - signal_id: E-D2-1
+    dimension: D2
+    evidence_id: E-AUTOMATION-1
+    qualifier: AUTOMATION_RELIABLE_LOW_LOGIN_OK
+
+expected:
+  objective_outcome_state: null
+  dimension_states:
+    D2: SUPPORTED
+  dimension_reliability: {}
+  risk_records: {}
+  dmeg_count: 0
+  reliability_level: HIGH
+  operational_priority: OP3
+  evidence_review: ER0
