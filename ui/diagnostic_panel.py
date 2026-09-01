@@ -7,6 +7,8 @@ steps 1-3 of the approved sequence: diagnostic result -> why -> uncertainty.
 """
 from __future__ import annotations
 
+import re
+
 import streamlit as st
 
 from confirmation.enums import ObjectiveResolutionStatus
@@ -58,22 +60,35 @@ def render(state) -> None:
 
     _render_objective_resolution(state)
 
+   _DIMENSION_PUBLIC_LABELS = {
+    "D1": "Objective Outcome",
+    "D2": "Product Adoption",
+    "D6": "Relationship Health",
+    }
+
+    _CITATION_PATTERN = re.compile(r"\s*\(CHDM[^)]*\)\.?\s*$")
+
+    def _public_text(text: str) -> str:
+    """Strip internal spec citations like '(CHDM v0.1 §4.2)' from reviewer-facing copy."""
+        return _CITATION_PATTERN.sub("", text).rstrip()
+
+
     with st.expander("Why this result", expanded=False):
-        st.write(f"**Operational Priority:** {result.operational_priority.reason_code.human_readable_text}")
+        st.write(
+            f"**Operational Priority:** "
+            f"{_public_text(result.operational_priority.reason_code.human_readable_text)}"
+        )
         for dim, dim_state in result.dimension_states.items():
-            readonly_note = (
-                " _(read-only in the current MVP confirmation workflow -- M3-OD-01 unresolved)_"
-                if dim.value in _READ_ONLY_DIMENSIONS else ""
-            )
+            label = _DIMENSION_PUBLIC_LABELS.get(dim.value, dim.value)
+            state_text = dim_state.state.value.replace("_", " ").capitalize()
             st.write(
-                f"**Dimension {dim.value}:** {dim_state.state.value} "
-                f"(dimension reliability: {dim_state.dimension_reliability}){readonly_note}  \n"
-                f"{dim_state.reason_code.human_readable_text}"
+                f"**{label}:** {state_text}.  \n"
+                f"{_public_text(dim_state.reason_code.human_readable_text)}"
             )
         for mech, risk in result.risk_records.items():
             potential = risk.potential_severity.value if risk.potential_severity else "None"
             activated = risk.activated_severity.value if risk.activated_severity else "None"
-            st.write(f"**Risk {mech.value}:** potential={potential}, activated={activated}")
+            st.write(f"**Risk {mech.value}:** potential={potential}, activated={activated}"))
 
     is_er1 = result.evidence_review.value.value == "ER1"
     with st.expander("Uncertainty", expanded=is_er1):
