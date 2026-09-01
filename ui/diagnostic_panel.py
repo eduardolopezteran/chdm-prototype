@@ -60,17 +60,17 @@ def render(state) -> None:
 
     _render_objective_resolution(state)
 
-   _DIMENSION_PUBLIC_LABELS = {
+_DIMENSION_PUBLIC_LABELS = {
     "D1": "Objective Outcome",
     "D2": "Product Adoption",
     "D6": "Relationship Health",
-    }
+}
 
-    _CITATION_PATTERN = re.compile(r"\s*\(CHDM[^)]*\)\.?\s*$")
+_CITATION_PATTERN = re.compile(r"\s*\(CHDM[^)]*\)\.?\s*$")
 
-    def _public_text(text: str) -> str:
+def _public_text(text: str) -> str:
     """Strip internal spec citations like '(CHDM v0.1 §4.2)' from reviewer-facing copy."""
-        return _CITATION_PATTERN.sub("", text).rstrip()
+    return _CITATION_PATTERN.sub("", text).rstrip()
 
 
     with st.expander("Why this result", expanded=False):
@@ -100,24 +100,34 @@ def render(state) -> None:
                     "has not met the confirmation requirements."
                 )
 
+    is_er1 = result.evidence_review.value.value == "ER1"
 
-is_er1 = result.evidence_review.value.value == "ER1"
-with st.expander("Uncertainty", expanded=is_er1):
-    review_text = "Required" if is_er1 else "Not currently required"
-    st.write(f"**Evidence review:** {review_text}")
+    with st.expander("Uncertainty", expanded=is_er1):
+        review_text = "Required" if is_er1 else "Not currently required"
+        st.write(f"**Evidence review:** {review_text}")
 
-    if not result.dmegs:
-        st.write("**Open material evidence gaps:** None")
-    else:
-        st.write("**Open material evidence gaps:**")
-        for dmeg in result.dmegs:
+        if not result.dmegs:
+            st.write("**Open material evidence gaps:** None")
+        else:
+            st.write("**Open material evidence gaps:**")
+            for dmeg in result.dmegs:
+                impact_text = (
+                    "This unresolved gap could affect Operational Priority."
+                    if dmeg.affects_operational_priority
+                    else "This unresolved gap does not currently affect Operational Priority."
+                )
+                st.write(f"- {impact_text}")
+
+        st.write(f"**Reliability:** {result.reliability.level.value}")
+
+        if result.reliability.limiting_factor_refs:
             st.write(
-                f"- **{dmeg.dmeg_id}** on `{dmeg.subject_construct_ref}` "
-                f"(affects Operational Priority: {dmeg.affects_operational_priority}) — "
-                f"{dmeg.reason_code}"
+                "**Reliability note:** Limited by unresolved material evidence gaps."
             )
-
-    st.write(f"**Reliability:** {result.reliability.level.value}")
+        else:
+            st.write(
+                "**Reliability note:** No unresolved material evidence gap is currently limiting the assessment."
+            )
        
-        limiting = ", ".join(result.reliability.limiting_factor_refs) or "None"
-        st.write(f"**Reliability limiting factors:** {limiting}")
+    limiting = ", ".join(result.reliability.limiting_factor_refs) or "None"
+    st.write(f"**Reliability limiting factors:** {limiting}")
