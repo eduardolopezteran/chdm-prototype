@@ -136,6 +136,3 @@ def render(state) -> None:
             st.write("**Reliability note:** Limited by unresolved material evidence gaps.")
         else:
             st.write("**Reliability note:** No unresolved material evidence gap is currently limiting the assessment.")
-       
-    limiting = ", ".join(result.reliability.limiting_factor_refs) or "None"
-    st.write(f"**Reliability limiting factors:** {limiting}")
