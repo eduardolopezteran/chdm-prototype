@@ -117,7 +117,7 @@ with st.expander("Uncertainty", expanded=is_er1):
                 f"{dmeg.reason_code}"
             )
 
-    st.write(f"**Reliability:** {result.reliability.???}")  # see note below
+    st.write(f"**Reliability:** {result.reliability.level.value}")
        
         limiting = ", ".join(result.reliability.limiting_factor_refs) or "None"
         st.write(f"**Reliability limiting factors:** {limiting}")
