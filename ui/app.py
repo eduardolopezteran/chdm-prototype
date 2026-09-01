@@ -45,7 +45,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown("""
+st.html("""
 <style>
 [data-testid="stMetricValue"],
 [data-testid="stMetricValue"] [data-testid="stMarkdownContainer"],
@@ -56,7 +56,7 @@ st.markdown("""
     line-height: 1.2;
 }
 </style>
-""", unsafe_allow_html=True)
+"""
 
 # Milestone 1 implements dimension-state evaluation for exactly D1/D2/D6
 # (engine/dimension_engine.py's IMPLEMENTED_DIMENSIONS) -- any other code
