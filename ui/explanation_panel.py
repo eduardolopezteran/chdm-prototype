@@ -76,7 +76,7 @@ def render(state) -> None:
         with st.expander(f"Diagnostic Questions ({len(cached.questions)})", expanded=True):
             for q in cached.questions:
                 st.write(f"**{q.rank}.** {q.text}")
-                st.caption(f"Targets: `{q.source_gap_ref}` -- {q.stake_description}")
+                st.caption(q.stake_description)
     else:
         with st.expander("Diagnostic Questions", expanded=False):
             st.write("No unresolved material items require a diagnostic question right now.")
