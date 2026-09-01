@@ -86,11 +86,22 @@ def render(state) -> None:
                 f"{_public_text(dim_state.reason_code.human_readable_text)}"
             )
         for mech, risk in result.risk_records.items():
-            potential = risk.potential_severity.value if risk.potential_severity else "None"
-            activated = risk.activated_severity.value if risk.activated_severity else "None"
-            st.write(f"**Risk {mech.value}:** potential={potential}, activated={activated}"))
+            potential = risk.potential_severity.value if risk.potential_severity else None
+            activated = risk.activated_severity.value if risk.activated_severity else None
 
-    is_er1 = result.evidence_review.value.value == "ER1"
+            if activated:
+                st.write(
+                    f"**Risk status:** {activated.replace('_', ' ').capitalize()} condition is active."
+                )
+            elif potential:
+                st.write(
+                    f"**Risk status:** A potential {potential.replace('_', ' ').lower()} condition "
+                    "has been identified, but it is not activated because the supporting evidence "
+                    "has not met the confirmation requirements."
+                )
+
+
+is_er1 = result.evidence_review.value.value == "ER1"
     with st.expander("Uncertainty", expanded=is_er1):
         st.write(f"**Evidence Review status:** {result.evidence_review.value.value}")
         if not result.dmegs:
