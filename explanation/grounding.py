@@ -290,6 +290,7 @@ def build_grounding_package(diagnostic: RecomputeDiagnostic, *, assessment_id: s
     dimension_state_summaries = tuple(
         {
             "dimension": dim.value,
+            "dimension_label": _DIMENSION_PUBLIC_LABEL.get(dim.value, dim.value),
             "state": dim_state.state.value,
             "dimension_reliability": dim_state.dimension_reliability,
             **_reason_code_dict(dim_state.reason_code),
