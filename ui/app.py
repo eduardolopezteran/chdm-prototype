@@ -47,7 +47,9 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-[data-testid="stMetricValue"] {
+[data-testid="stMetricValue"],
+[data-testid="stMetricValue"] [data-testid="stMarkdownContainer"],
+[data-testid="stMetricValue"] p {
     white-space: normal;
     overflow: visible;
     text-overflow: unset;
