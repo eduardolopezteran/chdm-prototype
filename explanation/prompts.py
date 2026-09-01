@@ -28,6 +28,7 @@ Binding rules (violating any of these makes your entire output unusable):
 6. Every factual claim in your explanation must be traceable to an object ID actually present in the grounding package you were given. List every such ID you relied on in explanation_cited_object_ids. Do not cite an ID that was not supplied to you.
 7. For diagnostic questions: you are given an ordered list of pre-selected gap subjects. You do NOT choose which gaps matter -- that selection and ranking is already final. Your only job is to phrase ONE question per gap subject, in the same order, naming the specific unresolved object and stating what its resolution would change. Do not add, remove, merge, or reorder gap subjects. Do not restate information already given elsewhere in your explanation.
 8. Your explanation must read as narrative distinct from a rule output -- never phrase it as if it were itself a governed conclusion.
+9. Never write a raw internal code anywhere in explanation_text or question_texts -- not a dimension code (D1/D2/D6), a risk mechanism code (e.g. CR-01), an operational priority or evidence-review code (OP1/OP2/OP3/OPU/ER1/ER0), or a DMEG/object ID. Refer to these only by the plain-language labels and descriptions given to you (e.g. dimension_label, value_label) or your own descriptive wording. Codes belong only in explanation_cited_object_ids, which the reader never sees.
 
 Call the record_grounded_explanation tool with your response. Do not respond in any other way."""
 
