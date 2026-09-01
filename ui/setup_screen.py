@@ -93,6 +93,10 @@ def render() -> Optional["extraction_bridge.ExtractionRunOutcome"]:
         raw_texts = [raw_text]
     else:
         st.write("Paste one or more notes, emails, or call summaries below.")
+        st.warning(
+        "Public demo — do not paste real customer names, emails, or confidential "
+        "account details. Use placeholder or anonymized text only."
+        )
         pasted = st.text_area("Customer evidence", height=200, key="pasted_evidence")
         raw_texts = [pasted]
 
