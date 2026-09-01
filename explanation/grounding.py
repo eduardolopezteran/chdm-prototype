@@ -43,6 +43,40 @@ from confirmation.schemas import RecomputeDiagnostic
 from .enums import GapKind
 from .schemas import GapSubject, GroundingPackage
 
+import re
+
+_CITATION_PATTERN = re.compile(r"\s*\(CHDM[^)]*\)\.?\s*$")
+
+def _public_text(text: str) -> str:
+    """Strip internal spec citations (e.g. '(CHDM v0.1 §4.2)') before this
+    text is handed to the model. Mirrors ui/diagnostic_panel.py's own
+    _public_text() -- duplicated, not imported, since explanation/ must
+    not depend on ui/."""
+    return _CITATION_PATTERN.sub("", text).rstrip()
+
+# Plain-language labels mirrored from ui/labels.py's OPERATIONAL_PRIORITY_LABEL/
+# EVIDENCE_REVIEW_LABEL and diagnostic_panel.py's own dimension label map.
+# Duplicated deliberately -- explanation/ cannot import ui/ (see ui/labels.py's
+# own docstring: "one direction only... never the reverse"). Keep in sync by
+# hand if that wording ever changes.
+_DIMENSION_PUBLIC_LABEL = {"D1": "Objective Outcome", "D2": "Product Adoption", "D6": "Relationship Health"}
+_OPERATIONAL_PRIORITY_PUBLIC_LABEL = {
+    "OP1": "Urgent Review", "OP2": "Review Required", "OP3": "Routine Monitoring", "OPU": "Undetermined",
+}
+_EVIDENCE_REVIEW_PUBLIC_LABEL = {"ER1": "Evidence Review Required", "ER0": "Evidence Review Not Required"}
+
+def _public_subject_label(subject_construct_ref: str) -> str:
+    """Plain-language label for a subject_construct_ref used in reviewer-
+    facing stake descriptions. Falls back to a generic phrase for anything
+    that isn't a known dimension code (e.g. a risk mechanism code like
+    "CR-01") -- this module doesn't own vetted plain wording for those, so
+    it never invents any, mirroring ui/labels.py's own fallback philosophy."""
+    if subject_construct_ref in _DIMENSION_PUBLIC_LABEL:
+        return _DIMENSION_PUBLIC_LABEL[subject_construct_ref]
+    if subject_construct_ref == "OBJECTIVE":
+        return "the account's objective"
+    return "this area of the assessment"
+  
 _MAX_GAP_SUBJECTS = 5
 
 
