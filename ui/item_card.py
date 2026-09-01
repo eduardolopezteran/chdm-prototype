@@ -153,22 +153,6 @@ def _render_review_controls(state, target_kind, target_observation_id: str, obs)
     # reviewer sees what they're being asked to decide before the JSON.
     _render_actions(state, target_kind, target_observation_id, obs)
 
-    with st.expander("Technical details", expanded=False):
-        st.json({k: str(v) for k, v in _representation_view(obs).items()})
-        st.caption(f"observation_id: {target_observation_id}")
-        # Milestone 3C: provenance (which extraction run produced this
-        # item) belongs ONLY here, never in the primary workflow (approved
-        # checkpoint decision 4) -- obs.system is deliberately excluded
-        # from _representation_view above (and from the editable Correct
-        # form), and is rendered separately, read-only, below.
-        system = getattr(obs, "system", None)
-        if system is not None:
-            st.caption(
-                f"Extraction provider: {system.model_provider} ({system.model_version})  \n"
-                f"Extracted at: {system.extracted_at.isoformat()}  \n"
-                f"Trace id: {system.trace_id}"
-            )
-
 
 def render(state, target_kind, target_observation_id: str, *, is_top_item: bool) -> None:
     obs = find_item(state.extraction_result, target_kind, target_observation_id)
