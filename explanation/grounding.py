@@ -84,7 +84,7 @@ def _reason_code_dict(reason_code: ReasonCode) -> dict:
     return {
         "code": reason_code.code,
         "governing_object_id": reason_code.governing_object_id,
-        "human_readable_text": reason_code.human_readable_text,
+        "human_readable_text": _public_text(reason_code.human_readable_text),
     }
 
 
@@ -114,12 +114,13 @@ def _stake_rank_for_dmeg(dmeg: DMEG) -> int:
 
 
 def _stake_description_for_dmeg(dmeg: DMEG, rank: int) -> str:
+    subject_label = _public_subject_label(dmeg.subject_construct_ref)
     by_rank = {
-        1: f"Resolving this could change Operational Priority (open gap on {dmeg.subject_construct_ref}).",
-        2: f"Resolving this could activate or alter a Material/Critical risk severity for {dmeg.subject_construct_ref}.",
-        3: f"Resolving this could change the governed conclusion for {dmeg.subject_construct_ref}.",
-        4: f"Resolving this could resolve an open contradiction on {dmeg.subject_construct_ref}.",
-        5: f"Resolving this could improve Assessment Reliability without changing a conclusion ({dmeg.subject_construct_ref}).",
+        1: f"Resolving this could change Operational Priority (open gap on {subject_label}).",
+        2: f"Resolving this could activate or alter a Material/Critical risk severity for {subject_label}.",
+        3: f"Resolving this could change the governed conclusion for {subject_label}.",
+        4: f"Resolving this could resolve an open contradiction on {subject_label}.",
+        5: f"Resolving this could improve Assessment Reliability without changing a conclusion ({subject_label}).",
     }
     return by_rank[rank]
 
@@ -159,8 +160,8 @@ def _unresolved_dimension_gap_subjects(result: EvaluationResult) -> list[GapSubj
             subject_construct_ref=dim.value,
             stake_rank=5,
             stake_description=(
-                f"Dimension {dim.value} remains Insufficient Evidence; resolving this "
-                "would let it reach a governed conclusion."
+              f"{_DIMENSION_PUBLIC_LABEL.get(dim.value, dim.value)} remains Insufficient Evidence; "
+              "resolving this would let it reach a governed conclusion."
             ),
             reason_code=None,
         ))
