@@ -73,6 +73,19 @@ def _public_text(text: str) -> str:
     return _CITATION_PATTERN.sub("", text).rstrip()
 
 
+def render(state) -> None:
+    result = state.current_diagnostic.result
+    st.subheader("Diagnostic Result")
+    cols = st.columns(4)
+    op_label = OPERATIONAL_PRIORITY_LABEL.get(result.operational_priority.value, result.operational_priority.value.value)
+    er_label = EVIDENCE_REVIEW_LABEL.get(result.evidence_review.value, result.evidence_review.value.value)
+    cols[0].metric("Operational Priority", op_label)
+    cols[1].metric("Evidence Review", er_label)
+    cols[2].metric("Reliability", result.reliability.level.value)
+    obj_state = result.objective_outcome.state.value if result.objective_outcome else "N/A"
+    cols[3].metric("Objective Outcome", obj_state)
+    _render_objective_resolution(state)
+
     with st.expander("Why this result", expanded=False):
         st.write(
             f"**Operational Priority:** "
@@ -88,11 +101,8 @@ def _public_text(text: str) -> str:
         for mech, risk in result.risk_records.items():
             potential = risk.potential_severity.value if risk.potential_severity else None
             activated = risk.activated_severity.value if risk.activated_severity else None
-
             if activated:
-                st.write(
-                    f"**Risk status:** {activated.replace('_', ' ').capitalize()} condition is active."
-                )
+                st.write(f"**Risk status:** {activated.replace('_', ' ').capitalize()} condition is active.")
             elif potential:
                 st.write(
                     f"**Risk status:** A potential {potential.replace('_', ' ').lower()} condition "
@@ -101,11 +111,9 @@ def _public_text(text: str) -> str:
                 )
 
     is_er1 = result.evidence_review.value.value == "ER1"
-
     with st.expander("Uncertainty", expanded=is_er1):
         review_text = "Required" if is_er1 else "Not currently required"
         st.write(f"**Evidence review:** {review_text}")
-
         if not result.dmegs:
             st.write("**Open material evidence gaps:** None")
         else:
@@ -117,17 +125,11 @@ def _public_text(text: str) -> str:
                     else "This unresolved gap does not currently affect Operational Priority."
                 )
                 st.write(f"- {impact_text}")
-
         st.write(f"**Reliability:** {result.reliability.level.value}")
-
         if result.reliability.limiting_factor_refs:
-            st.write(
-                "**Reliability note:** Limited by unresolved material evidence gaps."
-            )
+            st.write("**Reliability note:** Limited by unresolved material evidence gaps.")
         else:
-            st.write(
-                "**Reliability note:** No unresolved material evidence gap is currently limiting the assessment."
-            )
+            st.write("**Reliability note:** No unresolved material evidence gap is currently limiting the assessment.")
        
     limiting = ", ".join(result.reliability.limiting_factor_refs) or "None"
     st.write(f"**Reliability limiting factors:** {limiting}")
