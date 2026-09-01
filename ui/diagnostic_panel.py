@@ -102,16 +102,22 @@ def render(state) -> None:
 
 
 is_er1 = result.evidence_review.value.value == "ER1"
-    with st.expander("Uncertainty", expanded=is_er1):
-        st.write(f"**Evidence Review status:** {result.evidence_review.value.value}")
-        if not result.dmegs:
-            st.write("No open DMEGs (Decision-Material Evidence Gaps).")
-        else:
-            for dmeg in result.dmegs:
-                st.write(
-                    f"- **{dmeg.dmeg_id}** on `{dmeg.subject_construct_ref}` "
-                    f"(affects Operational Priority: {dmeg.affects_operational_priority}) — "
-                    f"{dmeg.reason_code}"
-                )
+with st.expander("Uncertainty", expanded=is_er1):
+    review_text = "Required" if is_er1 else "Not currently required"
+    st.write(f"**Evidence review:** {review_text}")
+
+    if not result.dmegs:
+        st.write("**Open material evidence gaps:** None")
+    else:
+        st.write("**Open material evidence gaps:**")
+        for dmeg in result.dmegs:
+            st.write(
+                f"- **{dmeg.dmeg_id}** on `{dmeg.subject_construct_ref}` "
+                f"(affects Operational Priority: {dmeg.affects_operational_priority}) — "
+                f"{dmeg.reason_code}"
+            )
+
+    st.write(f"**Reliability:** {result.reliability.???}")  # see note below
+       
         limiting = ", ".join(result.reliability.limiting_factor_refs) or "None"
         st.write(f"**Reliability limiting factors:** {limiting}")
