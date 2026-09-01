@@ -39,7 +39,22 @@ from . import (
 from .review_queue import build_review_queue
 from .state import AppState
 
-st.set_page_config(page_title="CHDM Human Confirmation (Prototype)", layout="wide")
+st.set_page_config(
+    page_title="CHDM Human Confirmation (Prototype)",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown("""
+<style>
+[data-testid="stMetricValue"] {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.2;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Milestone 1 implements dimension-state evaluation for exactly D1/D2/D6
 # (engine/dimension_engine.py's IMPLEMENTED_DIMENSIONS) -- any other code
