@@ -79,11 +79,17 @@ def render(state) -> None:
     cols = st.columns(4)
     op_label = OPERATIONAL_PRIORITY_LABEL.get(result.operational_priority.value, result.operational_priority.value.value)
     er_label = EVIDENCE_REVIEW_LABEL.get(result.evidence_review.value, result.evidence_review.value.value)
-    cols[0].metric("Operational Priority", op_label)
-    cols[1].metric("Evidence Review", er_label)
-    cols[2].metric("Reliability", result.reliability.level.value)
     obj_state = result.objective_outcome.state.value if result.objective_outcome else "N/A"
-    cols[3].metric("Objective Outcome", obj_state)
+    metrics = [
+        ("Operational Priority", op_label),
+        ("Evidence Review", er_label),
+        ("Reliability", result.reliability.level.value),
+        ("Objective Outcome", obj_state),
+    ]
+    for col, (label, value) in zip(cols, metrics):
+        col.markdown(f"**{label}**")
+        col.markdown(f"### {value}")
+        
     _render_objective_resolution(state)
 
     with st.expander("Why this result", expanded=False):
