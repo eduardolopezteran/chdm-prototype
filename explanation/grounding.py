@@ -315,11 +315,16 @@ def build_grounding_package(diagnostic: RecomputeDiagnostic, *, assessment_id: s
 
     operational_priority_summary = {
         "value": result.operational_priority.value.value,
+        "value_label": _OPERATIONAL_PRIORITY_PUBLIC_LABEL.get(
+            result.operational_priority.value.value, result.operational_priority.value.value
+        ),
         **_reason_code_dict(result.operational_priority.reason_code),
     }
-
     evidence_review_summary = {
         "value": result.evidence_review.value.value,
+        "value_label": _EVIDENCE_REVIEW_PUBLIC_LABEL.get(
+            result.evidence_review.value.value, result.evidence_review.value.value
+        ),
         "dmeg_refs": list(result.evidence_review.dmeg_refs),
         "reason_codes": list(result.evidence_review.reason_codes),
     }
