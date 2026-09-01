@@ -56,7 +56,7 @@ st.html("""
     line-height: 1.2;
 }
 </style>
-"""
+""")
 
 # Milestone 1 implements dimension-state evaluation for exactly D1/D2/D6
 # (engine/dimension_engine.py's IMPLEMENTED_DIMENSIONS) -- any other code
